@@ -7,7 +7,7 @@ namespace Project
     {
         static void Main(string[] args)
         {
-            string basicProgramPath = "./Programs_in_BASIC/Teste.bas";
+            string basicProgramPath = "./Programs_in_BASIC/1.bas";
             BasicCompiler compiler = new BasicCompiler();
             compiler.CompileBasicPrograms(basicProgramPath);
         }

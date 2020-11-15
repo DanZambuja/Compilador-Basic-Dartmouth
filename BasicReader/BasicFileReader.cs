@@ -6,6 +6,7 @@ namespace BasicReader
     public class BasicFileReader
     {
         public BasicFileReader() {
+
         }
         
         public string[] ReadAllLines(string path) {
@@ -16,6 +17,16 @@ namespace BasicReader
             }
 
             return lines;
+        }
+
+        public string ReadAllText(string path) {
+            string file = null;
+
+            if(File.Exists(path)) {
+                file = File.ReadAllText(path);
+            }
+
+            return file;
         }
     }
 }

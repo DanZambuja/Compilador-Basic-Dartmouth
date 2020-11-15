@@ -1,11 +1,15 @@
 using System;
-using BasicReader;
 
 namespace Compiler
 {
     public class SyntaxAnalizer {
+        public SyntaxAnalizer() { 
+        }
 
-        public BasicCompiler() { }
-        
+        public void Analyze(string file) {
+            foreach(char element in file) {
+                Console.WriteLine(element);
+            }
+        }
     }
 }
