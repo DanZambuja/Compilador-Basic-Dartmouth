@@ -4,10 +4,6 @@ using System.Collections.Generic;
 
 namespace Compiler.LexicalAnalysis
 {
-    public class Token {
-        public string Value { get; set; }
-    }
-
     public enum LexicalMachineState
     {
         EMPTY,
@@ -15,41 +11,62 @@ namespace Compiler.LexicalAnalysis
         STRING_TOKEN,
         SPECIAL_TOKEN
     }
-
-    public class LexicalEventEngine {
-        private LexicalStateMachine StateMachine{ get; set; }
-        public LexicalEventEngine() {
-            this.StateMachine = new LexicalStateMachine();
-        }
-        public void ConsumeCategorizedSymbolEvent(AsciiAtom symbol) {
-            this.StateMachine.MoveNext(symbol);
-        }
-    }
+    
+    public delegate void TokenIdentified(string token);
 
     public class LexicalStateMachine {
         private Categorizer categorizer = new Categorizer();
         private Dictionary<LexicalStateTransition, LexicalMachineState> transitions;
+        public event TokenIdentified NotifyTokenIdentified;
         private string currentToken = string.Empty;
-
         public LexicalMachineState CurrentState { get; private set; }
+
         public LexicalStateMachine() {
             CurrentState = LexicalMachineState.EMPTY;
             transitions = new Dictionary<LexicalStateTransition, LexicalMachineState>
             {
-                { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.CONTROL), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.DELIMITER), LexicalMachineState.EMPTY },
+                { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.CONTROL), LexicalMachineState.EMPTY },
 
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.CONTROL), LexicalMachineState.EMPTY },
 
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.DIGIT), LexicalMachineState.STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.OPENING_PAR), LexicalMachineState.STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.CLOSING_PAR), LexicalMachineState.STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN},
+                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.CONTROL), LexicalMachineState.EMPTY },
 
+                { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.SPECIAL), LexicalMachineState.EMPTY },
+                { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.CONTROL), LexicalMachineState.EMPTY },
             };
+        }
+
+        protected virtual void OnTokenIdentified() {
+            NotifyTokenIdentified?.Invoke(this.currentToken);
+        }
+
+        public void ConsumeCategorizedSymbolEvent(AsciiAtom symbol) {
+            this.MoveNext(symbol);
+        }
+
+        private void UpdateTokenState(AsciiAtom command) {
+            if (command.Category != AtomType.CONTROL && command.Category != AtomType.DELIMITER)
+                this.currentToken = this.currentToken + command.Symbol;
+        }
+
+        private void ClearToken() {
+            this.currentToken = string.Empty;
         }
 
         public LexicalMachineState GetNext(AtomType command)
@@ -61,24 +78,17 @@ namespace Compiler.LexicalAnalysis
             return nextState;
         }
 
-        private void UpdateTokenState(AsciiAtom command) {
-            if (!(command.Category == AtomType.CONTROL))
-                this.currentToken = this.currentToken + command.Symbol;
-        }
-
-        private void ClearToken() {
-            this.currentToken = string.Empty;
-        }
-
         public LexicalMachineState MoveNext(AsciiAtom command)
         {
             LexicalMachineState nextState = GetNext(command.Category);
 
-            if (nextState == LexicalMachineState.EMPTY) {
-                Console.WriteLine("IDENTIFIED TOKEN");
-                Console.WriteLine(this.currentToken);
-                Console.WriteLine("------------");
-
+            if (nextState == LexicalMachineState.EMPTY ||
+                nextState == LexicalMachineState.SPECIAL_TOKEN && 
+                (this.CurrentState == LexicalMachineState.STRING_TOKEN || this.CurrentState == LexicalMachineState.INT_TOKEN) ||
+                (nextState == LexicalMachineState.INT_TOKEN || nextState == LexicalMachineState.STRING_TOKEN) && 
+                this.CurrentState == LexicalMachineState.SPECIAL_TOKEN) {
+                
+                this.OnTokenIdentified();
                 this.ClearToken();
             }
 

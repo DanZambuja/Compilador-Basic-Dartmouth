@@ -7,6 +7,9 @@ namespace Compiler.AsciiCategorizer
         LETTER,
         DIGIT,
         SPECIAL,
+        OPENING_PAR,
+        CLOSING_PAR,
+        DELIMITER,
         CONTROL
     }
 
@@ -25,7 +28,33 @@ namespace Compiler.AsciiCategorizer
         }
         public void Categorize(char symbol) {
             int numericalValue = (int)symbol;
-            if ((numericalValue >= 97 && numericalValue <= 122) || 
+            if (numericalValue == 32) {
+
+                OnCategorizedSymbol(new AsciiAtom {
+                    Symbol = symbol,
+                    Category = AtomType.DELIMITER
+                });
+            }
+            else if (numericalValue == 10) {
+
+                OnCategorizedSymbol(new AsciiAtom {
+                    Symbol = symbol,
+                    Category = AtomType.CONTROL
+                });
+            }
+            else if (numericalValue == 40) {
+                OnCategorizedSymbol(new AsciiAtom {
+                    Symbol = symbol,
+                    Category = AtomType.OPENING_PAR
+                });
+            }
+            else if (numericalValue == 41) {
+                OnCategorizedSymbol(new AsciiAtom {
+                    Symbol = symbol,
+                    Category = AtomType.CLOSING_PAR
+                });
+            }
+            else if ((numericalValue >= 97 && numericalValue <= 122) || 
                  numericalValue >= 65 && numericalValue <= 90) {
 
                 OnCategorizedSymbol(new AsciiAtom {
@@ -50,15 +79,7 @@ namespace Compiler.AsciiCategorizer
                     Category = AtomType.SPECIAL
                 });
             }
-            else if ((numericalValue == 10 || numericalValue == 32)) {
-
-                OnCategorizedSymbol(new AsciiAtom {
-                    Symbol = symbol,
-                    Category = AtomType.CONTROL
-                });
-            }
             else {
-                
                 throw new Exception("Unrecognized symbol");
             }
         }

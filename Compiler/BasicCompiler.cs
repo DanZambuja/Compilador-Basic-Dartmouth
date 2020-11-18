@@ -1,23 +1,25 @@
-using System;
-using BasicReader;
-using Compiler.LexicalAnalysis;
+using FileIO;
 using Compiler.AsciiCategorizer;
+using Compiler.LexicalAnalysis;
+using Compiler.SyntaxAnalysis;
 
 namespace Compiler
 {
     public class BasicCompiler {
-        private BasicFileReader reader;
+        private FileManager fileManager;
         private Categorizer asciiCategorizer;
-        private LexicalEventEngine lexical;
-
-        public BasicCompiler() {
-            this.reader = new BasicFileReader();
+        private LexicalStateMachine lexical;
+        private SyntaxStateMachine syntax;
+        public BasicCompiler(string outputPath) {
+            this.fileManager = new FileManager(outputPath);
             this.asciiCategorizer = new Categorizer();
-            this.lexical = new LexicalEventEngine();
+            this.lexical = new LexicalStateMachine();
+            this.syntax = new SyntaxStateMachine();
             this.asciiCategorizer.NotifySymbolCategorization += this.lexical.ConsumeCategorizedSymbolEvent;
+            this.lexical.NotifyTokenIdentified += this.syntax.ConsumeIdentifiedTokenEvent;
         }
         public void CompileBasicPrograms(string path) {
-            string file = this.reader.ReadAllText(path) + ' ';
+            string file = this.fileManager.ReadAllText(path) + ' ';
             foreach(char symbol in file) {
                 this.asciiCategorizer.Categorize(symbol);
             }

@@ -1,5 +1,4 @@
-﻿using System;
-using Compiler;
+﻿using Compiler;
 
 namespace Project
 {
@@ -8,7 +7,8 @@ namespace Project
         static void Main(string[] args)
         {
             string basicProgramPath = "./Programs_in_BASIC/1.bas";
-            BasicCompiler compiler = new BasicCompiler();
+            string outputFolderPath = "./";
+            BasicCompiler compiler = new BasicCompiler(outputFolderPath);
             compiler.CompileBasicPrograms(basicProgramPath);
         }
     }
