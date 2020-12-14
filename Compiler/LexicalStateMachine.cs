@@ -46,7 +46,7 @@ namespace Compiler.LexicalAnalysis
 
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
-                { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.SPECIAL), LexicalMachineState.EMPTY },
+                { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.CONTROL), LexicalMachineState.EMPTY },
             };

@@ -11,7 +11,11 @@ namespace FileIO
             this.outputFile = outputFile;
         }
 
-        public void WriteCompiledLine(string compiledText) {
+        public void ReceiveArmCommand(string armCommand) {
+            this.WriteCompiledText(armCommand);
+        }
+
+        public void WriteCompiledText(string compiledText) {
             File.AppendAllText(this.outputFile, compiledText);
         }
         

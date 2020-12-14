@@ -7,8 +7,10 @@ namespace Project
         static void Main(string[] args)
         {
             string basicProgramPath = "./Programs_in_BASIC/1.bas";
-            string outputFolderPath = "./";
+            string outputFolderPath = "./Output/output.s";
+            string setupFilePath = "./InitialSetupForArmFile/AssemblySetupForBarebones.s";
             BasicCompiler compiler = new BasicCompiler(outputFolderPath);
+            compiler.InitialSetupForBarebonesArmEnvironment(setupFilePath);
             compiler.CompileBasicPrograms(basicProgramPath);
         }
     }

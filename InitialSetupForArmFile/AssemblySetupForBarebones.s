@@ -69,9 +69,5 @@ unlock:
   msr cpsr, r0
   mov pc, lr
 
-mem:
-.space 10
-
 main:
-  b   task
   

@@ -18,6 +18,13 @@ namespace Compiler
             this.asciiCategorizer.NotifySymbolCategorization += this.lexical.ConsumeCategorizedSymbolEvent;
             this.lexical.NotifyTokenIdentified += this.syntax.ConsumeIdentifiedTokenEvent;
         }
+
+        public void InitialSetupForBarebonesArmEnvironment(string setupFilePath) {
+            string setupData = this.fileManager.ReadAllText(setupFilePath);
+            this.fileManager.WriteCompiledText(setupData);
+
+        }
+        
         public void CompileBasicPrograms(string path) {
             string file = this.fileManager.ReadAllText(path) + ' ';
             foreach(char symbol in file) {
