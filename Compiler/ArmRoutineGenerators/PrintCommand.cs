@@ -3,10 +3,8 @@ using Compiler.LexicalAnalysis;
 
 namespace Compiler.ArmRoutineGenerators
 {
-    public class LetCommand : ICommand
+    public class PrintCommand : ICommand
     {
-        private int variableIndex;
-        private int attributedValue;
         private string armInstructions = string.Empty;
 
         public void ConsumeToken(Token token) {
@@ -21,5 +19,6 @@ namespace Compiler.ArmRoutineGenerators
             Console.WriteLine(this.armInstructions);
             this.armInstructions = string.Empty;
         }
+
     }
 }

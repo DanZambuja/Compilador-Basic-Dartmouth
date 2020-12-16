@@ -1,6 +1,6 @@
 using FileIO;
 
-namespace Project.Compiler.ArmRoutineGenerators
+namespace Compiler.ArmRoutineGenerators
 {
     public class FinalizationCommand
     {

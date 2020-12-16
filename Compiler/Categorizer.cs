@@ -9,6 +9,7 @@ namespace Compiler.AsciiCategorizer
         SPECIAL,
         OPENING_PAR,
         CLOSING_PAR,
+        QUOTE,
         DELIMITER,
         CONTROL
     }
@@ -40,6 +41,13 @@ namespace Compiler.AsciiCategorizer
                 OnCategorizedSymbol(new AsciiAtom {
                     Symbol = symbol,
                     Category = AtomType.CONTROL
+                });
+            }
+            else if (numericalValue == 34) {
+
+                OnCategorizedSymbol(new AsciiAtom {
+                    Symbol = symbol,
+                    Category = AtomType.QUOTE
                 });
             }
             else if (numericalValue == 40) {

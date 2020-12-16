@@ -30,6 +30,7 @@ namespace Compiler
             foreach(char symbol in file) {
                 this.asciiCategorizer.Categorize(symbol);
             }
+            this.lexical.End();
         }
     }
 }
