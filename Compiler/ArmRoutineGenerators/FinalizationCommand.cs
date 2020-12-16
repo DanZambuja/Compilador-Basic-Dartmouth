@@ -4,17 +4,11 @@ namespace Compiler.ArmRoutineGenerators
 {
     public class FinalizationCommand
     {
-        private int variableCounter;
-
-        public FinalizationCommand(int variableCounter) {
-            this.variableCounter = variableCounter;
-        }
-
-        public string AllocateMemorySpaceForVariables() {
+        public string AllocateMemorySpaceForVariables(int variableCounter) {
 
             string armCommand = string.Empty;
             armCommand = "mem:\n";
-            armCommand += ".space " + 4 * this.variableCounter;
+            armCommand += ".space " + 4 * variableCounter;
 
             return armCommand;
         }

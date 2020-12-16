@@ -9,8 +9,12 @@ namespace Compiler.SyntaxAnalysis
     {
         EMPTY,
         PRINT,
-        LET,
         PRINT_MULTIPLE,
+        LET,
+        LET_VAR,
+        LET_EQ,
+        LET_INT,
+        LET_OP,
         FOR_LOOP,
         NEXT,
         VARIABLE_ASSIGN,
@@ -39,6 +43,11 @@ namespace Compiler.SyntaxAnalysis
             {
                 { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.INT), SyntaxMachineState.EMPTY },
                 { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.PRINT), SyntaxMachineState.PRINT },
+                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.LET), SyntaxMachineState.LET },
+
+                { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.STRING), SyntaxMachineState.LET },
+                { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.EQUALS), SyntaxMachineState.LET },
+                { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.INT), SyntaxMachineState.LET },
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.STRING), SyntaxMachineState.PRINT_MULTIPLE },
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.INT), SyntaxMachineState.PRINT_MULTIPLE },
