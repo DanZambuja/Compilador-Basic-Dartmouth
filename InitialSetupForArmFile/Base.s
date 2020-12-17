@@ -20,17 +20,3 @@ print_uart0_loop:
 	.global	c_entry
 	@ This is our entry point from startup.s
 c_entry:
-	ldr	r0, =HELLO_WORLD
-	bl	print_uart0
-	ldr	r0, =4
-	bl	print_uart0
-	b	.
-
-	.section	.rodata
-	.global	UART0DR
-UART0DR:
-	.word	0x101F1000 @ This is the UART0 address on a versatileboard
-	.section	.rodata.str1.4,"aMS",%progbits,1
-
-HELLO_WORLD: .ascii	"Hello world!\012\000"
-HELLO: .ascii	"Hello!\012\000"

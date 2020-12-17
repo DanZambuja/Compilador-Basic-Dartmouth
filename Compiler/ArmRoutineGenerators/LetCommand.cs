@@ -1,4 +1,5 @@
 using System;
+using FileIO;
 using Compiler.LexicalAnalysis;
 
 namespace Compiler.ArmRoutineGenerators
@@ -8,6 +9,11 @@ namespace Compiler.ArmRoutineGenerators
         private int variableIndex;
         private int attributedValue;
         private string armInstructions = string.Empty;
+        private FileManager fileManager;
+
+        public LetCommand(FileManager fileManager) {
+            this.fileManager = fileManager;
+        }
 
         public void ConsumeToken(Token token) {
             this.armInstructions += token.Text;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FileIO;
 using Compiler.LexicalAnalysis;
 using Compiler.ArmRoutineGenerators;
 
@@ -34,10 +35,9 @@ namespace Compiler.SyntaxAnalysis
         private Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
 
         private Dictionary<SyntaxMachineState, ICommand> commands;
+        private FileManager fileManager;
 
-        private ArmRoutineGenerator routines = new ArmRoutineGenerator();
-
-        public SyntaxStateMachine() { 
+        public SyntaxStateMachine(FileManager fileManager) { 
             CurrentState = SyntaxMachineState.EMPTY;
             transitions = new Dictionary<SyntaxStateTransition, SyntaxMachineState>
             {
@@ -51,14 +51,17 @@ namespace Compiler.SyntaxAnalysis
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.STRING), SyntaxMachineState.PRINT_MULTIPLE },
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.INT), SyntaxMachineState.PRINT_MULTIPLE },
+                { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.VAR), SyntaxMachineState.PRINT_MULTIPLE },
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.COMMA), SyntaxMachineState.PRINT },
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.INT), SyntaxMachineState.EMPTY },
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.END), SyntaxMachineState.EMPTY },
             };
 
-            PrintCommand print = new PrintCommand();
-            LetCommand let = new LetCommand();
+            this.fileManager = fileManager;
+
+            PrintCommand print = new PrintCommand(fileManager);
+            LetCommand let = new LetCommand(fileManager);
 
             this.commands = new Dictionary<SyntaxMachineState, ICommand>{
                 { SyntaxMachineState.PRINT, print },
@@ -69,9 +72,9 @@ namespace Compiler.SyntaxAnalysis
 
         public void ConsumeIdentifiedTokenEvent(Token token) {
             if (token.Type == TokenType.ARRAY) {
-                //Console.WriteLine(token.Text + " - " + token.IndexOrSize.ToString() + " - " + token.Type.ToString());
+                Console.WriteLine(token.Text + " - " + token.IndexOrSize.ToString() + " - " + token.Type.ToString());
             } else {
-                //Console.WriteLine(token.Text + " - " + token.Type.ToString());
+                Console.WriteLine(token.Text + " - " + token.Type.ToString());
             }
             this.MoveNext(token);
         }
@@ -86,7 +89,7 @@ namespace Compiler.SyntaxAnalysis
             SyntaxMachineState nextState;
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + token.Text + " " + token.Type.ToString());
-            Console.WriteLine(this.CurrentState + " -> " + nextState);
+            // Console.WriteLine(this.CurrentState + " -> " + nextState);
             return nextState;
         }
 
@@ -104,8 +107,9 @@ namespace Compiler.SyntaxAnalysis
             return CurrentState;
         }
 
-        public void FinalizeAnalysis() {
-            this.routines.Finalize(this.variableCounter);
+        public void End() {
+            FinalizationCommand final = new FinalizationCommand(this.fileManager);
+            final.AllocateMemorySpaceForVariables(this.variableCounter);
         }
 
     class SyntaxStateTransition {

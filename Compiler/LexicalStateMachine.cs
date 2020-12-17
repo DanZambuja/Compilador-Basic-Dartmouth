@@ -10,7 +10,8 @@ namespace Compiler.LexicalAnalysis
         INT_TOKEN,
         STRING_TOKEN,
         SPECIAL_TOKEN,
-        ARRAY_TOKEN
+        ARRAY_TOKEN,
+        VAR_TOKEN
     }
 
     public enum TokenType {
@@ -31,6 +32,7 @@ namespace Compiler.LexicalAnalysis
         STEP,
         COMMA,
         STRING,
+        VAR,
         ARRAY,
         INT,
         EQUALS,
@@ -47,7 +49,7 @@ namespace Compiler.LexicalAnalysis
         public string Text { get; set; }
         public int IndexOrSize {get; set;}
 
-        public Token(LexicalMachineState state, string tokenString) {
+        public Token(LexicalMachineState state, string tokenString, AsciiAtom command) {
             this.Text = tokenString;
 
             if (state == LexicalMachineState.STRING_TOKEN) {
@@ -86,7 +88,11 @@ namespace Compiler.LexicalAnalysis
                     "-" => TokenType.MINUS,
                     _ => TokenType.ERROR
                 };
-            } else {
+            } else if (state == LexicalMachineState.VAR_TOKEN) {
+                this.Type = TokenType.VAR;
+                this.Text += command.Symbol;
+            }
+            else {
                 this.Type = TokenType.ERROR;
             }
         }
@@ -117,11 +123,14 @@ namespace Compiler.LexicalAnalysis
             transitions = new Dictionary<LexicalStateTransition, LexicalMachineState>
             {
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
-                { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.LETTER), LexicalMachineState.VAR_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.QUOTE), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.CONTROL), LexicalMachineState.EMPTY },
+
+                { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.DIGIT), LexicalMachineState.EMPTY },
+                { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
 
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
@@ -174,7 +183,7 @@ namespace Compiler.LexicalAnalysis
             LexicalMachineState nextState;
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
-            //Console.WriteLine(this.CurrentState + " -> " + nextState);
+            // Console.WriteLine(this.CurrentState + " -> " + nextState);
             return nextState;
         }
 
@@ -188,7 +197,7 @@ namespace Compiler.LexicalAnalysis
                 (nextState == LexicalMachineState.INT_TOKEN || nextState == LexicalMachineState.STRING_TOKEN) && 
                 this.CurrentState == LexicalMachineState.SPECIAL_TOKEN) {
                 
-                this.OnTokenIdentified();
+                this.OnTokenIdentified(command);
                 this.ClearToken();
             }
 
@@ -197,12 +206,12 @@ namespace Compiler.LexicalAnalysis
             return CurrentState;
         }
 
-        protected virtual void OnTokenIdentified() {
+        protected virtual void OnTokenIdentified(AsciiAtom command) {
             if (this.CurrentState == LexicalMachineState.ARRAY_TOKEN) {
                 NotifyTokenIdentified?.Invoke(new Token(this.currentToken, this.indexOrSize));
             } 
             else {
-                NotifyTokenIdentified?.Invoke(new Token(this.CurrentState, this.currentToken));
+                NotifyTokenIdentified?.Invoke(new Token(this.CurrentState, this.currentToken, command));
             }
         }
         

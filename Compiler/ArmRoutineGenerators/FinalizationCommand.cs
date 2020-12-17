@@ -4,13 +4,18 @@ namespace Compiler.ArmRoutineGenerators
 {
     public class FinalizationCommand
     {
-        public string AllocateMemorySpaceForVariables(int variableCounter) {
+        private FileManager fileManager;
+        public FinalizationCommand(FileManager fileManager) {
+            this.fileManager = fileManager;
+        }
+        public void AllocateMemorySpaceForVariables(int variableCounter) {
+            string data = string.Empty;
+            if (variableCounter > 0) {
+                data = "mem:\n";
+                data += " .space " + 4 * variableCounter;
 
-            string armCommand = string.Empty;
-            armCommand = "mem:\n";
-            armCommand += ".space " + 4 * variableCounter;
-
-            return armCommand;
+                this.fileManager.WriteVarAndDataTable(data);
+            }
         }
     }
 }
