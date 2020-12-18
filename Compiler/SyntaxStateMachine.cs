@@ -21,7 +21,8 @@ namespace Compiler.SyntaxAnalysis
         VARIABLE_ASSIGN,
         DIM,
         READ,
-        DATA
+        DATA,
+        SEQ_ID
     }
 
     public delegate void OutputCompiledToWrite(string armCommand);
@@ -52,6 +53,7 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.STRING), SyntaxMachineState.PRINT_MULTIPLE },
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.INT), SyntaxMachineState.PRINT_MULTIPLE },
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.VAR), SyntaxMachineState.PRINT_MULTIPLE },
+                { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.END), SyntaxMachineState.EMPTY },
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.COMMA), SyntaxMachineState.PRINT },
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.INT), SyntaxMachineState.EMPTY },
@@ -62,11 +64,13 @@ namespace Compiler.SyntaxAnalysis
 
             PrintCommand print = new PrintCommand(fileManager);
             LetCommand let = new LetCommand(fileManager);
+            SequenceIdLabelCommand sequenceIdLabel = new SequenceIdLabelCommand(fileManager);
 
             this.commands = new Dictionary<SyntaxMachineState, ICommand>{
                 { SyntaxMachineState.PRINT, print },
                 { SyntaxMachineState.PRINT_MULTIPLE, print },
-                { SyntaxMachineState.LET, let }
+                { SyntaxMachineState.LET, let },
+                { SyntaxMachineState.SEQ_ID, sequenceIdLabel }
             };
         }
 
@@ -99,8 +103,14 @@ namespace Compiler.SyntaxAnalysis
 
             if (this.CurrentState != SyntaxMachineState.EMPTY && nextState != SyntaxMachineState.EMPTY) {
                 this.commands[this.CurrentState].ConsumeToken(token);
-            } else if (this.CurrentState != SyntaxMachineState.EMPTY && nextState == SyntaxMachineState.EMPTY) {
-                this.commands[this.CurrentState].Clear();
+            } else if (this.CurrentState != SyntaxMachineState.EMPTY && 
+                       nextState == SyntaxMachineState.EMPTY &&
+                       token.Type == TokenType.INT) {
+                this.commands[SyntaxMachineState.SEQ_ID].ConsumeToken(token);
+            } else if (this.CurrentState == SyntaxMachineState.EMPTY && 
+                       nextState == SyntaxMachineState.EMPTY &&
+                       token.Type == TokenType.INT) {
+                this.commands[SyntaxMachineState.SEQ_ID].ConsumeToken(token);
             }
             
             this.CurrentState = nextState;

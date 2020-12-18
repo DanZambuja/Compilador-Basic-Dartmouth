@@ -4,19 +4,20 @@ using FileIO;
 
 namespace Compiler.ArmRoutineGenerators
 {
-    public class GoCommand : ICommand
+    public class SequenceIdLabelCommand : ICommand
     {
+
         private readonly FileManager fileManager;
-        public GoCommand(FileManager fileManager) {
+
+        public SequenceIdLabelCommand(FileManager fileManager) {
             this.fileManager = fileManager;
         }
 
         public void ConsumeToken(Token token) {
-            string instruction = string.Empty;
+            string label = string.Empty;
+            label += "LABEL_" + token.Text + ":\n";
 
-            instruction += "    JP LABEL_" + token.Text + "\n";
-
-            this.fileManager.WriteInstructionsToFile(instruction);
+            this.fileManager.WriteInstructionsToFile(label);
         }
     }
 }

@@ -5,20 +5,12 @@ namespace Compiler.ArmRoutineGenerators
 {
     public class IfCommand : ICommand
     {
-        private string armInstructions = string.Empty;
+        public IfCommand() {
 
+        }
+        
         public void ConsumeToken(Token token) {
-            this.armInstructions += token.Text;
-        }
 
-        public string GenerateArmInstructions() {
-            return this.armInstructions;
         }
-
-        public void Clear() {
-            Console.WriteLine(this.armInstructions);
-            this.armInstructions = string.Empty;
-        }
-
     }
 }

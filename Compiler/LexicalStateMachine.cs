@@ -29,6 +29,7 @@ namespace Compiler.LexicalAnalysis
         RETURN,
         REMARK,
         IF,
+        THEN,
         STEP,
         COMMA,
         STRING,
@@ -38,6 +39,8 @@ namespace Compiler.LexicalAnalysis
         EQUALS,
         PLUS,
         MINUS,
+        MULT,
+        DIV,
         OPENING_BRACES,
         CLOSING_BRACES,
         ERROR,
@@ -70,6 +73,7 @@ namespace Compiler.LexicalAnalysis
                     "REMARK" => TokenType.REMARK,
                     "IF" => TokenType.IF,
                     "STEP" => TokenType.STEP,
+                    "THEN" => TokenType.THEN,
                     _ => TokenType.STRING
                 };
 
@@ -86,6 +90,8 @@ namespace Compiler.LexicalAnalysis
                     "," => TokenType.COMMA,
                     "+" => TokenType.PLUS,
                     "-" => TokenType.MINUS,
+                    "*" => TokenType.MULT,
+                    "/" => TokenType.DIV,
                     _ => TokenType.ERROR
                 };
             } else if (state == LexicalMachineState.VAR_TOKEN) {
@@ -191,7 +197,8 @@ namespace Compiler.LexicalAnalysis
         {
             LexicalMachineState nextState = GetNext(command.Category);
 
-            if (nextState == LexicalMachineState.EMPTY && this.CurrentState != LexicalMachineState.EMPTY ||
+            if (nextState == LexicalMachineState.EMPTY && command.Category == AtomType.CONTROL ||
+                nextState == LexicalMachineState.EMPTY && this.CurrentState != LexicalMachineState.EMPTY ||
                 nextState == LexicalMachineState.SPECIAL_TOKEN && 
                 (this.CurrentState == LexicalMachineState.STRING_TOKEN || this.CurrentState == LexicalMachineState.INT_TOKEN) ||
                 (nextState == LexicalMachineState.INT_TOKEN || nextState == LexicalMachineState.STRING_TOKEN) && 
@@ -209,7 +216,10 @@ namespace Compiler.LexicalAnalysis
         protected virtual void OnTokenIdentified(AsciiAtom command) {
             if (this.CurrentState == LexicalMachineState.ARRAY_TOKEN) {
                 NotifyTokenIdentified?.Invoke(new Token(this.currentToken, this.indexOrSize));
-            } 
+            } else if (command.Category == AtomType.CONTROL) {
+                NotifyTokenIdentified?.Invoke(new Token(this.CurrentState, this.currentToken, command));
+                NotifyTokenIdentified?.Invoke(new Token());
+            }
             else {
                 NotifyTokenIdentified?.Invoke(new Token(this.CurrentState, this.currentToken, command));
             }

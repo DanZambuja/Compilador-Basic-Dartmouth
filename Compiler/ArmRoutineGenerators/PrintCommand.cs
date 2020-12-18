@@ -25,11 +25,7 @@ namespace Compiler.ArmRoutineGenerators
                 this.GeneratePrintVar(0);
             }
         }
-
-        public void Clear() {
-            
-        }
-
+        
         private void GeneratePrintString(string message) {
             this.printStringCount++;
             string instructions = string.Empty;
@@ -71,7 +67,7 @@ namespace Compiler.ArmRoutineGenerators
             string instructions = string.Empty;
 
             instructions += "   ldr r0, =" + number + "\n";
-            instructions += "   bl print_uart0";
+            instructions += "   bl print_uart0\n";
 
             this.fileManager.WriteInstructionsToFile(instructions);
         }

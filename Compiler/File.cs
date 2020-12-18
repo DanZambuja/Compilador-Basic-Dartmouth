@@ -59,6 +59,16 @@ namespace FileIO
         private void WriteCompiledText(string output, string data) {
             File.AppendAllText(output, data);
         }
+
+        public void ClearPreviouslyCompiledOutputFiles() {
+            if (File.Exists(this.finalOutputFile))
+                File.Delete(this.finalOutputFile);
+            if (File.Exists(this.instructionFile))
+                File.Delete(this.instructionFile);
+            if (File.Exists(this.printDataFile))
+                File.Delete(this.printDataFile);
+
+        }
         
         public string[] ReadAllLines(string path) {
             string[] lines = null;

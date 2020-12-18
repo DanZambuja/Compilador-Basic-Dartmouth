@@ -1,1 +1,2 @@
-10 PRINT "HEY"
+10 PRINT "HEY", "Hello"
+20 PRINT "H"

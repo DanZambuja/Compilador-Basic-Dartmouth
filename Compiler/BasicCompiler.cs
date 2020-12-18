@@ -34,6 +34,7 @@ namespace Compiler
         }
         
         public void CompileBasicPrograms(string path) {
+            this.fileManager.ClearPreviouslyCompiledOutputFiles();
             string file = this.fileManager.ReadAllText(path) + ' ';
             foreach(char symbol in file) {
                 this.asciiCategorizer.Categorize(symbol);

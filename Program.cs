@@ -13,7 +13,7 @@ namespace Project
             string baseFile = "./InitialSetupForArmFile/Base.s";
             string beforePrintDataFile = "./InitialSetupForArmFile/BeforePrintData.s";
             string finalOutputFile = "./CompiledProgram/program.s";
-            // string setupFilePath = "./InitialSetupForArmFile/AssemblySetupForBarebones.s";
+
             BasicCompiler compiler = new BasicCompiler(
                 instructionsFile, 
                 printDataFile, 
@@ -21,7 +21,7 @@ namespace Project
                 baseFile,
                 beforePrintDataFile,
                 finalOutputFile);
-            // compiler.InitialSetupForBarebonesArmEnvironment(setupFilePath);
+
             compiler.CompileBasicPrograms(basicProgramPath);
         }
     }
