@@ -12,11 +12,13 @@ namespace Compiler.ArmRoutineGenerators
         }
 
         public void ConsumeToken(Token token) {
-            string instruction = string.Empty;
+            if (token.Type != TokenType.TO) {
+                string instruction = string.Empty;
 
-            instruction += "    JP LABEL_" + token.Text + "\n";
+                instruction += "    b LABEL_" + token.Text + "\n";
 
-            this.fileManager.WriteInstructionsToFile(instruction);
+                this.fileManager.WriteInstructionsToFile(instruction);
+            }
         }
     }
 }

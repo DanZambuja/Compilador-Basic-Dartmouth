@@ -1,2 +1,2 @@
-10 PRINT "HEY", "Hello"
-20 PRINT "H"
+10 PRINT "HEY", "HELLO"
+20 LET I1 = 25 + 9

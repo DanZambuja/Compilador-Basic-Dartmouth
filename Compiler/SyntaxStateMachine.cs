@@ -22,7 +22,9 @@ namespace Compiler.SyntaxAnalysis
         DIM,
         READ,
         DATA,
-        SEQ_ID
+        SEQ_ID,
+        GO,
+        REMARK
     }
 
     public delegate void OutputCompiledToWrite(string armCommand);
@@ -45,6 +47,15 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.INT), SyntaxMachineState.EMPTY },
                 { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.PRINT), SyntaxMachineState.PRINT },
                 { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.LET), SyntaxMachineState.LET },
+                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.GOTO), SyntaxMachineState.GO },
+                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.GO), SyntaxMachineState.GO },
+                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.END), SyntaxMachineState.EMPTY },
+                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.REMARK), SyntaxMachineState.REMARK },
+
+                { new SyntaxStateTransition(SyntaxMachineState.REMARK, TokenType.END), SyntaxMachineState.EMPTY },
+                
+                { new SyntaxStateTransition(SyntaxMachineState.GO, TokenType.TO), SyntaxMachineState.GO },
+                { new SyntaxStateTransition(SyntaxMachineState.GO, TokenType.INT), SyntaxMachineState.EMPTY },
 
                 { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.STRING), SyntaxMachineState.LET },
                 { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.EQUALS), SyntaxMachineState.LET },
@@ -65,12 +76,14 @@ namespace Compiler.SyntaxAnalysis
             PrintCommand print = new PrintCommand(fileManager);
             LetCommand let = new LetCommand(fileManager);
             SequenceIdLabelCommand sequenceIdLabel = new SequenceIdLabelCommand(fileManager);
+            GoCommand go = new GoCommand(fileManager);
 
             this.commands = new Dictionary<SyntaxMachineState, ICommand>{
                 { SyntaxMachineState.PRINT, print },
                 { SyntaxMachineState.PRINT_MULTIPLE, print },
                 { SyntaxMachineState.LET, let },
-                { SyntaxMachineState.SEQ_ID, sequenceIdLabel }
+                { SyntaxMachineState.SEQ_ID, sequenceIdLabel },
+                { SyntaxMachineState.GO, go }
             };
         }
 
@@ -99,11 +112,19 @@ namespace Compiler.SyntaxAnalysis
 
         public SyntaxMachineState MoveNext(Token token)
         {
+            if (this.CurrentState == SyntaxMachineState.REMARK && token.Type != TokenType.END)
+                return this.CurrentState;
+
             SyntaxMachineState nextState = GetNext(token);
 
             if (this.CurrentState != SyntaxMachineState.EMPTY && nextState != SyntaxMachineState.EMPTY) {
                 this.commands[this.CurrentState].ConsumeToken(token);
-            } else if (this.CurrentState != SyntaxMachineState.EMPTY && 
+            } else if (this.CurrentState == SyntaxMachineState.GO && 
+                       nextState == SyntaxMachineState.EMPTY && 
+                       token.Type == TokenType.INT) {
+                this.commands[SyntaxMachineState.GO].ConsumeToken(token);
+            }
+            else if (this.CurrentState != SyntaxMachineState.EMPTY && 
                        nextState == SyntaxMachineState.EMPTY &&
                        token.Type == TokenType.INT) {
                 this.commands[SyntaxMachineState.SEQ_ID].ConsumeToken(token);
