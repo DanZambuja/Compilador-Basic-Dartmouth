@@ -10,12 +10,15 @@ namespace Compiler.ArmRoutineGenerators
         }
         public void AllocateMemorySpaceForVariables(int variableCounter) {
             string data = string.Empty;
-            if (variableCounter > 0) {
-                data = "mem:\n";
-                data += " .space " + 4 * variableCounter;
 
-                this.fileManager.WriteVarAndDataTable(data);
+            data += "   b .\n";
+
+            if (variableCounter > 0) {
+                data += "mem:\n";
+                data += " .space " + 4 * variableCounter + "\n\n";
             }
+
+            this.fileManager.WriteVarAndDataTable(data);
         }
     }
 }

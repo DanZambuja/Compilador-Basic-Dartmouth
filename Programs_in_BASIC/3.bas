@@ -1,2 +1,2 @@
 10 PRINT "HEY", "HELLO"
-20 LET I1 = 25 + 9
+20 LET I1 = 35 + 9 - 35

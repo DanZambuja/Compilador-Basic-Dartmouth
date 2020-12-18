@@ -14,7 +14,7 @@ namespace Compiler.SyntaxAnalysis
         LET,
         LET_VAR,
         LET_EQ,
-        LET_INT,
+        LET_EXP,
         LET_OP,
         FOR_LOOP,
         NEXT,
@@ -39,6 +39,9 @@ namespace Compiler.SyntaxAnalysis
 
         private Dictionary<SyntaxMachineState, ICommand> commands;
         private FileManager fileManager;
+        private LetCommand let;
+        private LetFirstArithmeticCommand letFirst;
+        private LetSecondArithmeticCommand letSecond;
 
         public SyntaxStateMachine(FileManager fileManager) { 
             CurrentState = SyntaxMachineState.EMPTY;
@@ -57,9 +60,19 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.GO, TokenType.TO), SyntaxMachineState.GO },
                 { new SyntaxStateTransition(SyntaxMachineState.GO, TokenType.INT), SyntaxMachineState.EMPTY },
 
-                { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.STRING), SyntaxMachineState.LET },
-                { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.EQUALS), SyntaxMachineState.LET },
-                { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.INT), SyntaxMachineState.LET },
+                { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.VAR), SyntaxMachineState.LET_VAR },
+
+                { new SyntaxStateTransition(SyntaxMachineState.LET_VAR, TokenType.EQUALS), SyntaxMachineState.LET_EQ },
+
+                { new SyntaxStateTransition(SyntaxMachineState.LET_EQ, TokenType.INT), SyntaxMachineState.LET_EXP },
+
+                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.PLUS), SyntaxMachineState.LET_OP },
+                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.MINUS), SyntaxMachineState.LET_OP },
+                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.MULT), SyntaxMachineState.LET_OP },
+                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.DIV), SyntaxMachineState.LET_OP },
+                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.END), SyntaxMachineState.EMPTY },
+
+                { new SyntaxStateTransition(SyntaxMachineState.LET_OP, TokenType.INT), SyntaxMachineState.LET_EXP },
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.STRING), SyntaxMachineState.PRINT_MULTIPLE },
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.INT), SyntaxMachineState.PRINT_MULTIPLE },
@@ -72,16 +85,17 @@ namespace Compiler.SyntaxAnalysis
             };
 
             this.fileManager = fileManager;
+            this.let = new LetCommand(fileManager);
+            this.letFirst = new LetFirstArithmeticCommand(fileManager);
+            this.letSecond = new LetSecondArithmeticCommand(fileManager);
 
             PrintCommand print = new PrintCommand(fileManager);
-            LetCommand let = new LetCommand(fileManager);
             SequenceIdLabelCommand sequenceIdLabel = new SequenceIdLabelCommand(fileManager);
             GoCommand go = new GoCommand(fileManager);
 
             this.commands = new Dictionary<SyntaxMachineState, ICommand>{
                 { SyntaxMachineState.PRINT, print },
                 { SyntaxMachineState.PRINT_MULTIPLE, print },
-                { SyntaxMachineState.LET, let },
                 { SyntaxMachineState.SEQ_ID, sequenceIdLabel },
                 { SyntaxMachineState.GO, go }
             };
@@ -89,9 +103,9 @@ namespace Compiler.SyntaxAnalysis
 
         public void ConsumeIdentifiedTokenEvent(Token token) {
             if (token.Type == TokenType.ARRAY) {
-                Console.WriteLine(token.Text + " - " + token.IndexOrSize.ToString() + " - " + token.Type.ToString());
+                Console.WriteLine("S1: " + token.Text + " - " + token.IndexOrSize.ToString() + " - " + token.Type.ToString());
             } else {
-                Console.WriteLine(token.Text + " - " + token.Type.ToString());
+                Console.WriteLine("S2: " + token.Text + " - " + token.Type.ToString());
             }
             this.MoveNext(token);
         }
@@ -106,7 +120,7 @@ namespace Compiler.SyntaxAnalysis
             SyntaxMachineState nextState;
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + token.Text + " " + token.Type.ToString());
-            // Console.WriteLine(this.CurrentState + " -> " + nextState);
+            Console.WriteLine("S: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             return nextState;
         }
 
@@ -116,8 +130,21 @@ namespace Compiler.SyntaxAnalysis
                 return this.CurrentState;
 
             SyntaxMachineState nextState = GetNext(token);
-
-            if (this.CurrentState != SyntaxMachineState.EMPTY && nextState != SyntaxMachineState.EMPTY) {
+            if (this.CurrentState == SyntaxMachineState.LET && nextState == SyntaxMachineState.LET_VAR) {
+                this.variableToIndex[token.Text] = this.variableCounter;
+                this.let.ReceiveVariableIndex(this.variableCounter);
+                this.variableCounter++;
+            } else if (this.CurrentState == SyntaxMachineState.LET_EXP && nextState == SyntaxMachineState.EMPTY) {
+                this.let.GenerateStoreInMemInstructions();
+            } else if (this.CurrentState == SyntaxMachineState.LET_EQ && nextState == SyntaxMachineState.LET_EXP) {
+                this.letFirst.ReceivedLeftSideOfOperation(token);
+            } else if (this.CurrentState == SyntaxMachineState.LET_EXP && nextState == SyntaxMachineState.LET_OP) {
+                this.letSecond.ReceiveOperation(token);
+            } else if (this.CurrentState == SyntaxMachineState.LET_OP && nextState == SyntaxMachineState.LET_EXP) {
+                this.letSecond.ReceiveRightSideOfOperation(token);
+            }
+            else if (this.CurrentState != SyntaxMachineState.EMPTY && nextState != SyntaxMachineState.EMPTY &&
+                    !(this.CurrentState == SyntaxMachineState.LET_VAR && nextState == SyntaxMachineState.LET_EQ)) {
                 this.commands[this.CurrentState].ConsumeToken(token);
             } else if (this.CurrentState == SyntaxMachineState.GO && 
                        nextState == SyntaxMachineState.EMPTY && 

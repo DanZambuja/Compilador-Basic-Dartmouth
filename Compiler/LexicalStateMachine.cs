@@ -96,7 +96,6 @@ namespace Compiler.LexicalAnalysis
                 };
             } else if (state == LexicalMachineState.VAR_TOKEN) {
                 this.Type = TokenType.VAR;
-                this.Text += command.Symbol;
             }
             else {
                 this.Type = TokenType.ERROR;
@@ -136,8 +135,10 @@ namespace Compiler.LexicalAnalysis
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.CONTROL), LexicalMachineState.EMPTY },
 
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.DIGIT), LexicalMachineState.EMPTY },
+                { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
-
+                { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
+                
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
@@ -189,13 +190,32 @@ namespace Compiler.LexicalAnalysis
             LexicalMachineState nextState;
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
-            // Console.WriteLine(this.CurrentState + " -> " + nextState);
+            Console.WriteLine("L :" + this.CurrentState + " -> " + nextState + " : " + command.ToString());
             return nextState;
         }
 
         public LexicalMachineState MoveNext(AsciiAtom command)
         {
             LexicalMachineState nextState = GetNext(command.Category);
+
+            if (nextState == LexicalMachineState.VAR_TOKEN && this.CurrentState == LexicalMachineState.EMPTY) {
+                Console.WriteLine("1 Curr token: " + this.currentToken);
+                this.UpdateTokenState(command);
+                Console.WriteLine("2 Curr token: " + this.currentToken);
+                this.CurrentState = nextState;
+                return CurrentState;
+            }
+
+            if (nextState == LexicalMachineState.EMPTY && this.CurrentState == LexicalMachineState.VAR_TOKEN) {
+                Console.WriteLine("3 Curr token: " + this.currentToken);
+                this.UpdateTokenState(command);
+                Console.WriteLine("4 Curr token: " + this.currentToken);
+                this.OnTokenIdentified(command);
+                this.ClearToken();
+
+                this.CurrentState = nextState;
+                return CurrentState;
+            }
 
             if (nextState == LexicalMachineState.EMPTY && command.Category == AtomType.CONTROL ||
                 nextState == LexicalMachineState.EMPTY && this.CurrentState != LexicalMachineState.EMPTY ||
@@ -221,6 +241,7 @@ namespace Compiler.LexicalAnalysis
                 NotifyTokenIdentified?.Invoke(new Token());
             }
             else {
+                Console.WriteLine("L: sent token: " + this.currentToken);
                 NotifyTokenIdentified?.Invoke(new Token(this.CurrentState, this.currentToken, command));
             }
         }

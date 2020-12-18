@@ -26,23 +26,21 @@ LABEL_10:
    ldr r0, =PRINT_2
    bl print_uart0
 LABEL_20:
-    b LABEL_40
-LABEL_30:
-   ldr r0, =PRINT_3
-   bl print_uart0
-LABEL_40:
-   ldr r0, =PRINT_4
-   bl print_uart0
-LABEL_50:
-LABEL_60:
-    b LABEL_80
-LABEL_70:
-   ldr r0, =PRINT_5
-   bl print_uart0
-LABEL_80:
-   ldr r0, =PRINT_6
-   bl print_uart0
-	b	.
+    ldr r0, =35
+   ldr r1, =9
+   add r0, r0, r1
+   ldr r1, =35
+   sub r0, r0, r1
+   ldr r1, =0
+   adr r2, mem
+   ldr r3, =4
+   mul r5, r1, r3
+   add r2, r2, r5
+   str r0, [r2]
+   b .
+mem:
+ .space 4
+
 
 	.section	.rodata
 	.global	UART0DR
@@ -52,7 +50,3 @@ UART0DR:
 
 PRINT_1: .ascii "HEY\012\000"
 PRINT_2: .ascii "HELLO\012\000"
-PRINT_3: .ascii "WILLNOTSHOW1\012\000"
-PRINT_4: .ascii "WILLSHOW1\012\000"
-PRINT_5: .ascii "WILLNOTSHOW2\012\000"
-PRINT_6: .ascii "WILLSHOW2\012\000"

@@ -39,9 +39,10 @@ namespace FileIO
 
             this.WriteCompiledText(this.finalOutputFile, baseFileData);
             this.WriteCompiledText(this.finalOutputFile, instructionFileData);
+            this.WriteCompiledText(this.finalOutputFile, varAndArrayTableData);
             this.WriteCompiledText(this.finalOutputFile, beforePrintDataFileData);
             this.WriteCompiledText(this.finalOutputFile, printDataFileData);
-            this.WriteCompiledText(this.finalOutputFile, varAndArrayTableData);
+            
         }
 
         public void WriteInstructionsToFile(string instructions) {
@@ -67,7 +68,8 @@ namespace FileIO
                 File.Delete(this.instructionFile);
             if (File.Exists(this.printDataFile))
                 File.Delete(this.printDataFile);
-
+            if (File.Exists(this.varAndArrayTable))
+                File.Delete(this.varAndArrayTable);
         }
         
         public string[] ReadAllLines(string path) {
