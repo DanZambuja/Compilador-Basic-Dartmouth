@@ -8,23 +8,32 @@ namespace Compiler.SyntaxAnalysis
 {
     public enum SyntaxMachineState
     {
-        EMPTY,
+        START,
+        SEQ_ID,
         PRINT,
-        PRINT_MULTIPLE,
         LET,
-        LET_VAR,
-        LET_EQ,
-        LET_EXP,
-        LET_OP,
-        FOR_LOOP,
-        NEXT,
-        VARIABLE_ASSIGN,
+        FOR,
         DIM,
         READ,
-        DATA,
-        SEQ_ID,
-        GO,
         REMARK
+        
+        // EMPTY,
+        // PRINT,
+        // PRINT_MULTIPLE,
+        // LET,
+        // LET_VAR,
+        // LET_EQ,
+        // LET_EXP,
+        // LET_OP,
+        // FOR_LOOP,
+        // NEXT,
+        // VARIABLE_ASSIGN,
+        // DIM,
+        // READ,
+        // DATA,
+        // SEQ_ID,
+        // GO,
+        // REMARK
     }
 
     public delegate void OutputCompiledToWrite(string armCommand);
@@ -45,44 +54,61 @@ namespace Compiler.SyntaxAnalysis
 
         public SyntaxStateMachine(FileManager fileManager) { 
             CurrentState = SyntaxMachineState.EMPTY;
-            transitions = new Dictionary<SyntaxStateTransition, SyntaxMachineState>
+            transitions = new Dictionary<SyntaxStateTransition, SyntaxMachineState> 
             {
-                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.INT), SyntaxMachineState.EMPTY },
-                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.PRINT), SyntaxMachineState.PRINT },
-                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.LET), SyntaxMachineState.LET },
-                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.GOTO), SyntaxMachineState.GO },
-                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.GO), SyntaxMachineState.GO },
-                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.END), SyntaxMachineState.EMPTY },
-                { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.REMARK), SyntaxMachineState.REMARK },
+                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.INT), SyntaxMachineState.SEQ_ID }
 
-                { new SyntaxStateTransition(SyntaxMachineState.REMARK, TokenType.END), SyntaxMachineState.EMPTY },
+                { new SyntaxStateTransition(SyntaxMachineState.SEQ_ID, TokenType.PRINT), SyntaxMachineState.PRINT}
+                { new SyntaxStateTransition(SyntaxMachineState.SEQ_ID, TokenType.LET), SyntaxMachineState.LET}
+                { new SyntaxStateTransition(SyntaxMachineState.SEQ_ID, TokenType.FOR), SyntaxMachineState.FOR}
+                { new SyntaxStateTransition(SyntaxMachineState.SEQ_ID, TokenType.DIM), SyntaxMachineState.DIM}
+                { new SyntaxStateTransition(SyntaxMachineState.SEQ_ID, TokenType.REMARK), SyntaxMachineState.REMARK}
+
+                { new LexicalStateTransition(SyntaxMachineState.PRINT, TokenType.END), PrintMachineState.START },
+                { new LexicalStateTransition(SyntaxMachineState.LET, TokenType.END), PrintMachineState.START },
+                { new LexicalStateTransition(SyntaxMachineState.FOR, TokenType.END), PrintMachineState.START },
+                { new LexicalStateTransition(SyntaxMachineState.DIM, TokenType.END), PrintMachineState.START },
+                { new LexicalStateTransition(SyntaxMachineState.REMARK, TokenType.END), PrintMachineState.START },
+                { new LexicalStateTransition(SyntaxMachineState.GO, TokenType.END), PrintMachineState.START },
+            }
+            // transitions = new Dictionary<SyntaxStateTransition, SyntaxMachineState>
+            // {
+            //     { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.INT), SyntaxMachineState.EMPTY },
+            //     { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.PRINT), SyntaxMachineState.PRINT },
+            //     { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.LET), SyntaxMachineState.LET },
+            //     { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.GOTO), SyntaxMachineState.GO },
+            //     { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.GO), SyntaxMachineState.GO },
+            //     { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.END), SyntaxMachineState.EMPTY },
+            //     { new SyntaxStateTransition(SyntaxMachineState.EMPTY, TokenType.REMARK), SyntaxMachineState.REMARK },
+
+            //     { new SyntaxStateTransition(SyntaxMachineState.REMARK, TokenType.END), SyntaxMachineState.EMPTY },
                 
-                { new SyntaxStateTransition(SyntaxMachineState.GO, TokenType.TO), SyntaxMachineState.GO },
-                { new SyntaxStateTransition(SyntaxMachineState.GO, TokenType.INT), SyntaxMachineState.EMPTY },
+            //     { new SyntaxStateTransition(SyntaxMachineState.GO, TokenType.TO), SyntaxMachineState.GO },
+            //     { new SyntaxStateTransition(SyntaxMachineState.GO, TokenType.INT), SyntaxMachineState.EMPTY },
 
-                { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.VAR), SyntaxMachineState.LET_VAR },
+            //     { new SyntaxStateTransition(SyntaxMachineState.LET, TokenType.VAR), SyntaxMachineState.LET_VAR },
 
-                { new SyntaxStateTransition(SyntaxMachineState.LET_VAR, TokenType.EQUALS), SyntaxMachineState.LET_EQ },
+            //     { new SyntaxStateTransition(SyntaxMachineState.LET_VAR, TokenType.EQUALS), SyntaxMachineState.LET_EQ },
 
-                { new SyntaxStateTransition(SyntaxMachineState.LET_EQ, TokenType.INT), SyntaxMachineState.LET_EXP },
+            //     { new SyntaxStateTransition(SyntaxMachineState.LET_EQ, TokenType.INT), SyntaxMachineState.LET_EXP },
 
-                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.PLUS), SyntaxMachineState.LET_OP },
-                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.MINUS), SyntaxMachineState.LET_OP },
-                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.MULT), SyntaxMachineState.LET_OP },
-                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.DIV), SyntaxMachineState.LET_OP },
-                { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.END), SyntaxMachineState.EMPTY },
+            //     { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.PLUS), SyntaxMachineState.LET_OP },
+            //     { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.MINUS), SyntaxMachineState.LET_OP },
+            //     { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.MULT), SyntaxMachineState.LET_OP },
+            //     { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.DIV), SyntaxMachineState.LET_OP },
+            //     { new SyntaxStateTransition(SyntaxMachineState.LET_EXP, TokenType.END), SyntaxMachineState.EMPTY },
 
-                { new SyntaxStateTransition(SyntaxMachineState.LET_OP, TokenType.INT), SyntaxMachineState.LET_EXP },
+            //     { new SyntaxStateTransition(SyntaxMachineState.LET_OP, TokenType.INT), SyntaxMachineState.LET_EXP },
 
-                { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.STRING), SyntaxMachineState.PRINT_MULTIPLE },
-                { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.INT), SyntaxMachineState.PRINT_MULTIPLE },
-                { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.VAR), SyntaxMachineState.PRINT_MULTIPLE },
-                { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.END), SyntaxMachineState.EMPTY },
+            //     { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.STRING), SyntaxMachineState.PRINT_MULTIPLE },
+            //     { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.INT), SyntaxMachineState.PRINT_MULTIPLE },
+            //     { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.VAR), SyntaxMachineState.PRINT_MULTIPLE },
+            //     { new SyntaxStateTransition(SyntaxMachineState.PRINT, TokenType.END), SyntaxMachineState.EMPTY },
 
-                { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.COMMA), SyntaxMachineState.PRINT },
-                { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.INT), SyntaxMachineState.EMPTY },
-                { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.END), SyntaxMachineState.EMPTY },
-            };
+            //     { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.COMMA), SyntaxMachineState.PRINT },
+            //     { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.INT), SyntaxMachineState.EMPTY },
+            //     { new SyntaxStateTransition(SyntaxMachineState.PRINT_MULTIPLE, TokenType.END), SyntaxMachineState.EMPTY },
+            // };
 
             this.fileManager = fileManager;
             this.let = new LetCommand(fileManager);
@@ -150,7 +176,7 @@ namespace Compiler.SyntaxAnalysis
                        nextState == SyntaxMachineState.EMPTY && 
                        token.Type == TokenType.INT) {
                 this.commands[SyntaxMachineState.GO].ConsumeToken(token);
-            }
+            } 
             else if (this.CurrentState != SyntaxMachineState.EMPTY && 
                        nextState == SyntaxMachineState.EMPTY &&
                        token.Type == TokenType.INT) {
