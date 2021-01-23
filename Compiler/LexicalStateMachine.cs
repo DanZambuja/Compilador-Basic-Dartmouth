@@ -102,7 +102,7 @@ namespace Compiler.LexicalAnalysis
                 this.Type = TokenType.ERROR;
             }
         }
-        public Token(string vectorVariable, int indexOrSize, boolean elementOfArray) {
+        public Token(string vectorVariable, int indexOrSize, bool elementOfArray) {
             this.Text = vectorVariable;
             this.IndexOrSize = indexOrSize;
             if (elementOfArray)
@@ -190,11 +190,14 @@ namespace Compiler.LexicalAnalysis
 
         public LexicalMachineState GetNext(AtomType command)
         {
-            LexicalStateTransition transition = new LexicalStateTransition(CurrentState, command);
             LexicalMachineState nextState;
+            LexicalStateTransition transition = new LexicalStateTransition(CurrentState, command);
+            
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
+
             Console.WriteLine("L :" + this.CurrentState + " -> " + nextState + " : " + command.ToString());
+
             return nextState;
         }
 
@@ -203,17 +206,13 @@ namespace Compiler.LexicalAnalysis
             LexicalMachineState nextState = GetNext(command.Category);
 
             if (nextState == LexicalMachineState.VAR_TOKEN && this.CurrentState == LexicalMachineState.EMPTY) {
-                Console.WriteLine("1 Curr token: " + this.currentToken);
                 this.UpdateTokenState(command);
-                Console.WriteLine("2 Curr token: " + this.currentToken);
                 this.CurrentState = nextState;
                 return CurrentState;
             }
 
             if (nextState == LexicalMachineState.EMPTY && this.CurrentState == LexicalMachineState.VAR_TOKEN) {
-                Console.WriteLine("3 Curr token: " + this.currentToken);
                 this.UpdateTokenState(command);
-                Console.WriteLine("4 Curr token: " + this.currentToken);
                 this.OnTokenIdentified(command);
                 this.ClearToken();
 
@@ -239,7 +238,7 @@ namespace Compiler.LexicalAnalysis
 
         protected virtual void OnTokenIdentified(AsciiAtom command) {
             if (this.CurrentState == LexicalMachineState.ARRAY_TOKEN) {
-                NotifyTokenIdentified?.Invoke(new Token(this.currentToken, this.indexOrSize));
+                NotifyTokenIdentified?.Invoke(new Token(this.currentToken, this.indexOrSize, true));
             } else if (command.Category == AtomType.CONTROL) {
                 NotifyTokenIdentified?.Invoke(new Token(this.CurrentState, this.currentToken, command));
                 NotifyTokenIdentified?.Invoke(new Token());

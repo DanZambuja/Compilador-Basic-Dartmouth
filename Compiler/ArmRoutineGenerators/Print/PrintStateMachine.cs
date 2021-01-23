@@ -1,8 +1,9 @@
 using System;
-using Compiler.AsciiCategorizer;
+using FileIO;
+using Compiler.LexicalAnalysis;
 using System.Collections.Generic;
 
-namespace Compiler.LexicalAnalysis
+namespace Compiler.ArmRoutineGenerators
 {
     public enum PrintMachineState
     {
@@ -10,20 +11,16 @@ namespace Compiler.LexicalAnalysis
         PRINT,
         PRINT_MULTIPLE
     }
-    
-    public delegate void TokenIdentified(Token token);
 
     public class PrintStateMachine : ISubStateMachine {
-        private Categorizer categorizer = new Categorizer();
         private Dictionary<PrintStateTransition, PrintMachineState> transitions;
-        public event TokenIdentified NotifyTokenIdentified;
-        private string currentToken = string.Empty;
-        private int indexOrSize = 0;
         public PrintMachineState CurrentState { get; private set; }
 
-        public PrintStateMachine() {
+        private PrintCommand command;
+
+        public PrintStateMachine(FileManager fileManager) {
             CurrentState = PrintMachineState.START;
-            transitions = new Dictionary<LexicalStateTransition, LexicalMachineState>
+            transitions = new Dictionary<PrintStateTransition, PrintMachineState>
             {
                 { new PrintStateTransition(PrintMachineState.START, TokenType.PRINT), PrintMachineState.PRINT },
 
@@ -33,57 +30,54 @@ namespace Compiler.LexicalAnalysis
                 { new PrintStateTransition(PrintMachineState.PRINT, TokenType.ARRAY), PrintMachineState.PRINT_MULTIPLE },
                 { new PrintStateTransition(PrintMachineState.PRINT, TokenType.END), PrintMachineState.START },
 
-                { new PrintStateTransition(PrintMachineState.PRINT_MULTIPLE, TokenType.DELIMITER), PrintMachineState.PRINT },
+                { new PrintStateTransition(PrintMachineState.PRINT_MULTIPLE, TokenType.COMMA), PrintMachineState.PRINT },
                 { new PrintStateTransition(PrintMachineState.PRINT_MULTIPLE, TokenType.END), PrintMachineState.START },
             };
+
+            this.command = new PrintCommand(fileManager);
         }
 
-        public void ConsumeCategorizedSymbolEvent(AsciiAtom symbol) {
-            this.MoveNext(symbol);
-        }
 
-        private void ClearToken() {
-            this.currentToken = string.Empty;
-        }
-
-        public PrintMachineState GetNext(TokenType token)
+        public PrintMachineState GetNext(Token token)
         {
-            PrintStateTransition transition = new PrintStateTransition(CurrentState, token);
-            PrintMachineState nextState;
+            PrintMachineState nextState = this.CurrentState;
+            PrintStateTransition transition = new PrintStateTransition(CurrentState, token.Type);
+
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + token);
 
+            
+            
             return nextState;
         }
 
-        public PrintMachineState MoveToNextState(TokenType token)
+        public void MoveToNextState(Token token)
         {
             PrintMachineState nextState = GetNext(token);
 
             this.CurrentState = nextState;
-            return CurrentState;
         }
 
         class PrintStateTransition {
 
             public PrintMachineState CurrentState { get; private set; }
-            public TokenType Command { get; private set; }
+            public TokenType Token { get; private set; }
 
-            public PrintStateTransition(PrintMachineState currentState, TokenType command)
+            public PrintStateTransition(PrintMachineState currentState, TokenType token)
             {
                 this.CurrentState = currentState;
-                this.Command = command;
+                this.Token = token;
             }
 
             public override int GetHashCode()
             {
-                return 17 + 31 * CurrentState.GetHashCode() + 31 * Command.GetHashCode();
+                return 17 + 31 * CurrentState.GetHashCode() + 31 * Token.GetHashCode();
             }
 
             public override bool Equals(object obj)
             {
                 PrintStateTransition other = obj as PrintStateTransition;
-                return other != null && this.CurrentState == other.CurrentState && this.Command == other.Command;
+                return other != null && this.CurrentState == other.CurrentState && this.Token == other.Token;
             }
 
         }

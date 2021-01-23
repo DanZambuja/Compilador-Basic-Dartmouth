@@ -14,7 +14,8 @@ namespace Compiler.SyntaxAnalysis
         FOR,
         DIM,
         READ,
-        REMARK
+        REMARK,
+        GO
     }
 
     public delegate void OutputCompiledToWrite(string armCommand);
@@ -26,33 +27,35 @@ namespace Compiler.SyntaxAnalysis
         public SyntaxMachineState CurrentState { get; private set; }
         private int variableCounter = 0;
         private Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
-        private SyntaxEngine engine = new SyntaxEngine();
-        private SequenceIdLabelCommand sequenceId = new SequenceIdLabelCommand();
+        private SyntaxEngine engine;
+        private SequenceIdLabelCommand sequenceId;
 
         private FileManager fileManager;
 
         public SyntaxStateMachine(FileManager fileManager) { 
-            CurrentState = SyntaxMachineState.EMPTY;
+            CurrentState = SyntaxMachineState.START;
             transitions = new Dictionary<SyntaxStateTransition, SyntaxMachineState> 
             {
-                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.INT), SyntaxMachineState.START }
+                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.INT), SyntaxMachineState.START },
 
-                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.PRINT), SyntaxMachineState.PRINT }
-                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.LET), SyntaxMachineState.LET }
-                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.FOR), SyntaxMachineState.FOR }
-                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.DIM), SyntaxMachineState.DIM }
-                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.REMARK), SyntaxMachineState.REMARK }
-                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.GO), SyntaxMachineState.GO }
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.PRINT),    SyntaxMachineState.PRINT },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.LET),      SyntaxMachineState.LET },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.FOR),      SyntaxMachineState.FOR },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.DIM),      SyntaxMachineState.DIM },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.REMARK),   SyntaxMachineState.REMARK },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GO),       SyntaxMachineState.GO },
 
-                { new LexicalStateTransition(SyntaxMachineState.PRINT, TokenType.END), PrintMachineState.START },
-                { new LexicalStateTransition(SyntaxMachineState.LET, TokenType.END), PrintMachineState.START },
-                { new LexicalStateTransition(SyntaxMachineState.FOR, TokenType.END), PrintMachineState.START },
-                { new LexicalStateTransition(SyntaxMachineState.DIM, TokenType.END), PrintMachineState.START },
-                { new LexicalStateTransition(SyntaxMachineState.REMARK, TokenType.END), PrintMachineState.START },
-                { new LexicalStateTransition(SyntaxMachineState.GO, TokenType.END), PrintMachineState.START },
-            }
+                { new SyntaxStateTransition(SyntaxMachineState.PRINT,   TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.LET,     TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.FOR,     TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.DIM,     TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.REMARK,  TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.GO,      TokenType.END),      SyntaxMachineState.START }
+            };
 
             this.fileManager = fileManager;
+            this.sequenceId = new SequenceIdLabelCommand(fileManager);
+            this.engine = new SyntaxEngine(fileManager);
         }
 
         public void ConsumeIdentifiedTokenEvent(Token token) {
@@ -70,20 +73,18 @@ namespace Compiler.SyntaxAnalysis
 
         public SyntaxMachineState GetNext(Token token)
         {
-            SyntaxMachineState nextState;
+            SyntaxMachineState nextState = this.CurrentState;
             SyntaxStateTransition transition = new SyntaxStateTransition(CurrentState, token.Type);
 
             if ((this.CurrentState == SyntaxMachineState.START || this.CurrentState != SyntaxMachineState.START && token.Type == TokenType.END) && 
                 !transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + token.Text + " " + token.Type.ToString());
 
-            if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.INT && nextState == SyntaxMachineState.START) {
-                this.sequenceId.ConsumeToken(token)
-            }
+            if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.INT)
+                this.sequenceId.ConsumeToken(token);
             
-            if (this.CurrentState != SyntaxMachineState.START && token.Type != TokenType.END) {
-                this.engine.
-            }
+            if (this.CurrentState != SyntaxMachineState.START && token.Type != TokenType.END) 
+                this.engine.ConsumeToken(this.CurrentState, token);
             
             Console.WriteLine("S: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
@@ -128,13 +129,17 @@ namespace Compiler.SyntaxAnalysis
         }
 
         class SyntaxEngine {
-            private Dictionary<SyntaxMachineState, ISubStateMachine> currentSubStateMachine = new Dictionary<SyntaxMachineState, ISubStateMachine> 
-            {
-                { SyntaxMachineState.PRINT, new PrintStateMachine()}
+            private Dictionary<SyntaxMachineState, ISubStateMachine> subStateMachines;
+
+            public SyntaxEngine(FileManager fileManager) {
+                this.subStateMachines = new Dictionary<SyntaxMachineState, ISubStateMachine> 
+                {
+                    { SyntaxMachineState.PRINT, new PrintStateMachine(fileManager) }
+                };
             }
 
             public void ConsumeToken(SyntaxMachineState currentState, Token token) {
-
+                this.subStateMachines[currentState].MoveToNextState(token);
             }
         }
     }

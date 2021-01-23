@@ -21,9 +21,11 @@ namespace Compiler.ArmRoutineGenerators
                 this.GeneratePrintInt(token.Text);
             } else if (token.Type == TokenType.ARRAY) {
                 this.GeneratePrintVar(0);
+            } else if (token.Type == TokenType.ARRAY_ELEMENT) {
+                this.GeneratePrintVar(0);
             } else if (token.Type == TokenType.VAR) {
                 this.GeneratePrintVar(0);
-            }
+            } 
         }
         
         private void GeneratePrintString(string message) {
