@@ -6,4 +6,8 @@ namespace Compiler.ArmRoutineGenerators
     {
         void ConsumeToken(Token token);
     }
+
+    public interface ISubStateMachine {
+        void MoveToNextState(Token token);
+    }
 }

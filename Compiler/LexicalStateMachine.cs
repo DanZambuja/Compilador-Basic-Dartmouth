@@ -35,6 +35,7 @@ namespace Compiler.LexicalAnalysis
         STRING,
         VAR,
         ARRAY,
+        ARRAY_ELEMENT,
         INT,
         EQUALS,
         PLUS,
@@ -101,10 +102,13 @@ namespace Compiler.LexicalAnalysis
                 this.Type = TokenType.ERROR;
             }
         }
-        public Token(string vectorVariable, int indexOrSize) {
+        public Token(string vectorVariable, int indexOrSize, boolean elementOfArray) {
             this.Text = vectorVariable;
             this.IndexOrSize = indexOrSize;
-            this.Type = TokenType.ARRAY;
+            if (elementOfArray)
+                this.Type = TokenType.ARRAY_ELEMENT;
+            else
+                this.Type = TokenType.ARRAY;
         }
 
         public Token() {
@@ -146,10 +150,10 @@ namespace Compiler.LexicalAnalysis
 
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.DIGIT), LexicalMachineState.STRING_TOKEN },
-                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.OPENING_PAR), LexicalMachineState.ARRAY_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.DELIMITER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.QUOTE), LexicalMachineState.STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.OPENING_PAR), LexicalMachineState.ARRAY_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN},
-                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.CONTROL), LexicalMachineState.EMPTY },
 
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },

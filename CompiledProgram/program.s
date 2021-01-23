@@ -26,7 +26,7 @@ LABEL_10:
    ldr r0, =PRINT_2
    bl print_uart0
 LABEL_20:
-    ldr r0, =35
+   ldr r0, =35
    ldr r1, =9
    add r0, r0, r1
    ldr r1, =35
