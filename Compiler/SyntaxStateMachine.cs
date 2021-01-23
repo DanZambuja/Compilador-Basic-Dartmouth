@@ -37,6 +37,7 @@ namespace Compiler.SyntaxAnalysis
             transitions = new Dictionary<SyntaxStateTransition, SyntaxMachineState> 
             {
                 { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.INT), SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.END), SyntaxMachineState.START },
 
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.PRINT),    SyntaxMachineState.PRINT },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.LET),      SyntaxMachineState.LET },
@@ -78,13 +79,13 @@ namespace Compiler.SyntaxAnalysis
 
             if ((this.CurrentState == SyntaxMachineState.START || this.CurrentState != SyntaxMachineState.START && token.Type == TokenType.END) && 
                 !transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + token.Text + " " + token.Type.ToString());
+                throw new Exception("Invalid transition: " + CurrentState + " -> " +  nextState + "\nToken Text: " + token.Text + " Token Type: " + token.Type.ToString());
 
             if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.INT)
                 this.sequenceId.ConsumeToken(token);
+            else
+                this.engine.ConsumeToken(this.CurrentState, token, nextState);
             
-            if (this.CurrentState != SyntaxMachineState.START && token.Type != TokenType.END) 
-                this.engine.ConsumeToken(this.CurrentState, token);
             
             Console.WriteLine("S: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
@@ -138,8 +139,13 @@ namespace Compiler.SyntaxAnalysis
                 };
             }
 
-            public void ConsumeToken(SyntaxMachineState currentState, Token token) {
-                this.subStateMachines[currentState].MoveToNextState(token);
+            public void ConsumeToken(SyntaxMachineState currentState, Token token, SyntaxMachineState nextState) {
+                if (currentState == SyntaxMachineState.START && nextState != SyntaxMachineState.START) {
+                    this.subStateMachines[nextState].MoveToNextState(token);
+                } else if (currentState != SyntaxMachineState.START) {
+                    this.subStateMachines[currentState].MoveToNextState(token);
+                }
+                
             }
         }
     }

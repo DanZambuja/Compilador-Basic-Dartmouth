@@ -15,7 +15,7 @@ namespace Compiler.ArmRoutineGenerators
         }
 
         public void ConsumeToken(Token token) {
-            if (token.Type == TokenType.STRING) {
+            if (token.Type == TokenType.STRING || token.Type == TokenType.QUOTED_STRING) {
                 this.GeneratePrintString(token.Text);
             } else if (token.Type == TokenType.INT) {
                 this.GeneratePrintInt(token.Text);

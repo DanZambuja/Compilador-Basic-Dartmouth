@@ -17,9 +17,9 @@ After having that, you'll need to download these sources. Then, the following co
 
     
     arm-none-eabi-as -mcpu=arm926ej-s startup.s -o startup.o
-    arm-none-eabi-as -mcpu=arm926ej-s test.s -o test.o
-    arm-none-eabi-ld -T test.ld startup.o test.o -o test.elf
-    arm-none-eabi-objcopy -O binary test.elf test.bin
+    arm-none-eabi-as -mcpu=arm926ej-s program.s -o program.o
+    arm-none-eabi-ld -T program.ld startup.o program.o -o program.elf
+    arm-none-eabi-objcopy -O binary program.elf program.bin
 
 Executing
 =========

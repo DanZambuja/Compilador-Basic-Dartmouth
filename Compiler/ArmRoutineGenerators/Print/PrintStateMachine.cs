@@ -22,9 +22,11 @@ namespace Compiler.ArmRoutineGenerators
             CurrentState = PrintMachineState.START;
             transitions = new Dictionary<PrintStateTransition, PrintMachineState>
             {
+                { new PrintStateTransition(PrintMachineState.START, TokenType.END), PrintMachineState.START },
                 { new PrintStateTransition(PrintMachineState.START, TokenType.PRINT), PrintMachineState.PRINT },
 
                 { new PrintStateTransition(PrintMachineState.PRINT, TokenType.STRING), PrintMachineState.PRINT_MULTIPLE },
+                { new PrintStateTransition(PrintMachineState.PRINT, TokenType.QUOTED_STRING), PrintMachineState.PRINT_MULTIPLE },
                 { new PrintStateTransition(PrintMachineState.PRINT, TokenType.VAR), PrintMachineState.PRINT_MULTIPLE },
                 { new PrintStateTransition(PrintMachineState.PRINT, TokenType.INT), PrintMachineState.PRINT_MULTIPLE },
                 { new PrintStateTransition(PrintMachineState.PRINT, TokenType.ARRAY), PrintMachineState.PRINT_MULTIPLE },
@@ -44,11 +46,13 @@ namespace Compiler.ArmRoutineGenerators
             PrintStateTransition transition = new PrintStateTransition(CurrentState, token.Type);
 
             if (!transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + token);
+                throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
             if (this.CurrentState == PrintMachineState.PRINT && token.Type != TokenType.END) {
                 this.command.ConsumeToken(token);
             }
+
+            Console.WriteLine("P: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }

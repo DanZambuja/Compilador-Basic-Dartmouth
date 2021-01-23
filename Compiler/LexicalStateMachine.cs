@@ -99,8 +99,11 @@ namespace Compiler.LexicalAnalysis
                 };
             } else if (state == LexicalMachineState.VAR_TOKEN) {
                 this.Type = TokenType.VAR;
-            }
-            else {
+            } else if (state == LexicalMachineState.QUOTED_STRING_TOKEN) {
+                this.Type = TokenType.QUOTED_STRING;
+            } else if (command.Category == AtomType.CONTROL) {
+                this.Type = TokenType.END;
+            }else {
                 this.Type = TokenType.ERROR;
             }
         }
@@ -162,6 +165,7 @@ namespace Compiler.LexicalAnalysis
                 { new LexicalStateTransition(LexicalMachineState.QUOTED_STRING_TOKEN, AtomType.DIGIT), LexicalMachineState.QUOTED_STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.QUOTED_STRING_TOKEN, AtomType.LETTER), LexicalMachineState.QUOTED_STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.QUOTED_STRING_TOKEN, AtomType.DELIMITER), LexicalMachineState.QUOTED_STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.QUOTED_STRING_TOKEN, AtomType.SPECIAL), LexicalMachineState.QUOTED_STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.QUOTED_STRING_TOKEN, AtomType.QUOTE), LexicalMachineState.EMPTY },
 
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
@@ -183,13 +187,17 @@ namespace Compiler.LexicalAnalysis
             if (command.Category != AtomType.CONTROL && 
                 command.Category != AtomType.DELIMITER &&
                 command.Category != AtomType.OPENING_PAR &&
-                command.Category != AtomType.CLOSING_PAR)
+                command.Category != AtomType.CLOSING_PAR) {
                 if (this.CurrentState == LexicalMachineState.ARRAY_TOKEN) {
                     this.indexOrSize = Int32.Parse(command.Symbol.ToString());
                 } 
                 else {
                     this.currentToken = this.currentToken + command.Symbol;
                 }
+            } else if (this.CurrentState == LexicalMachineState.QUOTED_STRING_TOKEN) {
+                this.currentToken = this.currentToken + command.Symbol;
+            }
+
         }
 
         private void ClearToken() {
@@ -219,7 +227,8 @@ namespace Compiler.LexicalAnalysis
                 return CurrentState;
             }
 
-            if (nextState == LexicalMachineState.EMPTY && this.CurrentState == LexicalMachineState.VAR_TOKEN) {
+            if (nextState == LexicalMachineState.EMPTY && this.CurrentState == LexicalMachineState.VAR_TOKEN ||
+                nextState == LexicalMachineState.EMPTY && this.CurrentState == LexicalMachineState.QUOTED_STRING_TOKEN) {
                 this.UpdateTokenState(command);
                 this.OnTokenIdentified(command);
                 this.ClearToken();
