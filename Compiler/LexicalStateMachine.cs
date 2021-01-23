@@ -9,6 +9,7 @@ namespace Compiler.LexicalAnalysis
         EMPTY,
         INT_TOKEN,
         STRING_TOKEN,
+        QUOTED_STRING_TOKEN,
         SPECIAL_TOKEN,
         ARRAY_TOKEN,
         VAR_TOKEN
@@ -33,6 +34,7 @@ namespace Compiler.LexicalAnalysis
         STEP,
         COMMA,
         STRING,
+        QUOTED_STRING,
         VAR,
         ARRAY,
         ARRAY_ELEMENT,
@@ -133,7 +135,7 @@ namespace Compiler.LexicalAnalysis
             {
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.LETTER), LexicalMachineState.VAR_TOKEN },
-                { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.QUOTE), LexicalMachineState.STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.QUOTE), LexicalMachineState.QUOTED_STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.CONTROL), LexicalMachineState.EMPTY },
@@ -141,6 +143,7 @@ namespace Compiler.LexicalAnalysis
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.DIGIT), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.OPENING_PAR), LexicalMachineState.ARRAY_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
                 
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
@@ -150,11 +153,16 @@ namespace Compiler.LexicalAnalysis
 
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.DIGIT), LexicalMachineState.STRING_TOKEN },
-                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.DELIMITER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.QUOTE), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.OPENING_PAR), LexicalMachineState.ARRAY_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN},
                 { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.CONTROL), LexicalMachineState.EMPTY },
+                { new LexicalStateTransition(LexicalMachineState.STRING_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
+
+                { new LexicalStateTransition(LexicalMachineState.QUOTED_STRING_TOKEN, AtomType.DIGIT), LexicalMachineState.QUOTED_STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.QUOTED_STRING_TOKEN, AtomType.LETTER), LexicalMachineState.QUOTED_STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.QUOTED_STRING_TOKEN, AtomType.DELIMITER), LexicalMachineState.QUOTED_STRING_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.QUOTED_STRING_TOKEN, AtomType.QUOTE), LexicalMachineState.EMPTY },
 
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
@@ -190,14 +198,14 @@ namespace Compiler.LexicalAnalysis
 
         public LexicalMachineState GetNext(AtomType command)
         {
-            LexicalMachineState nextState;
+            LexicalMachineState nextState = this.CurrentState;
             LexicalStateTransition transition = new LexicalStateTransition(CurrentState, command);
             
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
 
             Console.WriteLine("L :" + this.CurrentState + " -> " + nextState + " : " + command.ToString());
-
+            
             return nextState;
         }
 

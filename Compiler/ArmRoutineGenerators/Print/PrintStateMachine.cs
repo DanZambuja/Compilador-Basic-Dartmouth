@@ -46,7 +46,9 @@ namespace Compiler.ArmRoutineGenerators
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + token);
 
-            
+            if (this.CurrentState == PrintMachineState.PRINT && token.Type != TokenType.END) {
+                this.command.ConsumeToken(token);
+            }
             
             return nextState;
         }

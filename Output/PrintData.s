@@ -1,2 +1,0 @@
-PRINT_1: .ascii "HEY\012\000"
-PRINT_2: .ascii "HELLO\012\000"

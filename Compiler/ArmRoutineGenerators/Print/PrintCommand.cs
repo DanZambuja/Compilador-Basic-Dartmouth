@@ -28,7 +28,7 @@ namespace Compiler.ArmRoutineGenerators
             } 
         }
         
-        private void GeneratePrintString(string message) {
+        public void GeneratePrintString(string message) {
             this.printStringCount++;
             string instructions = string.Empty;
 
