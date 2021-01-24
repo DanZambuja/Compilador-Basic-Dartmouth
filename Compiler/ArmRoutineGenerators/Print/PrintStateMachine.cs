@@ -85,7 +85,6 @@ namespace Compiler.ArmRoutineGenerators
                 PrintStateTransition other = obj as PrintStateTransition;
                 return other != null && this.CurrentState == other.CurrentState && this.Token == other.Token;
             }
-
         }
     }
 }

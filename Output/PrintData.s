@@ -1,3 +1,5 @@
-PRINT_1: .ascii "HEY\012\000"
-PRINT_2: .ascii "HELLO\012\000"
-PRINT_3: .ascii "How are you?\012\000"
+PRINT_1: .ascii "Nao vai aparecer 1\012\000"
+PRINT_2: .ascii "VAI APARECER 1\012\000"
+PRINT_3: .ascii "NAO VAI APARECER 2\012\000"
+PRINT_4: .ascii "VAI APARECER 2\012\000"
+PRINT_5: .ascii "VAI APARECER 3\012\000"

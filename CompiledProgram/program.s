@@ -21,11 +21,24 @@ print_uart0_loop:
 	@ This is our entry point from startup.s
 c_entry:
 LABEL_10:
+    b LABEL_40
+LABEL_20:
+LABEL_30:
    ldr r0, =PRINT_1
    bl print_uart0
+LABEL_40:
    ldr r0, =PRINT_2
    bl print_uart0
+LABEL_50:
+    b LABEL_70
+LABEL_60:
    ldr r0, =PRINT_3
+   bl print_uart0
+LABEL_70:
+   ldr r0, =PRINT_4
+   bl print_uart0
+LABEL_80:
+   ldr r0, =PRINT_5
    bl print_uart0
    b .
 
@@ -35,6 +48,8 @@ UART0DR:
 	.word	0x101F1000 @ This is the UART0 address on a versatileboard
 	.section	.rodata.str1.4,"aMS",%progbits,1
 
-PRINT_1: .ascii "HEY\012\000"
-PRINT_2: .ascii "HELLO\012\000"
-PRINT_3: .ascii "How are you?\012\000"
+PRINT_1: .ascii "Nao vai aparecer 1\012\000"
+PRINT_2: .ascii "VAI APARECER 1\012\000"
+PRINT_3: .ascii "NAO VAI APARECER 2\012\000"
+PRINT_4: .ascii "VAI APARECER 2\012\000"
+PRINT_5: .ascii "VAI APARECER 3\012\000"

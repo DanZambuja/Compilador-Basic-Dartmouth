@@ -73,7 +73,7 @@ namespace Compiler.LexicalAnalysis
                     "GOTO" => TokenType.GOTO,
                     "GOSUB" => TokenType.GOSUB,
                     "RETURN" => TokenType.RETURN,
-                    "REMARK" => TokenType.REMARK,
+                    "REM" => TokenType.REMARK,
                     "IF" => TokenType.IF,
                     "STEP" => TokenType.STEP,
                     "THEN" => TokenType.THEN,

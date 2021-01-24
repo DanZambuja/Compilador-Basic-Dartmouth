@@ -45,6 +45,7 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.DIM),      SyntaxMachineState.DIM },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.REMARK),   SyntaxMachineState.REMARK },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GO),       SyntaxMachineState.GO },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOTO),       SyntaxMachineState.GO },
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT,   TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.LET,     TokenType.END),      SyntaxMachineState.START },
@@ -135,7 +136,9 @@ namespace Compiler.SyntaxAnalysis
             public SyntaxEngine(FileManager fileManager) {
                 this.subStateMachines = new Dictionary<SyntaxMachineState, ISubStateMachine> 
                 {
-                    { SyntaxMachineState.PRINT, new PrintStateMachine(fileManager) }
+                    { SyntaxMachineState.PRINT, new PrintStateMachine(fileManager) },
+                    { SyntaxMachineState.REMARK, new RemarkStateMachine(fileManager) },
+                    { SyntaxMachineState.GO, new GoStateMachine(fileManager) }
                 };
             }
 
