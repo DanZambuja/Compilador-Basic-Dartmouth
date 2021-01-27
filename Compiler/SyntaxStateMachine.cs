@@ -25,8 +25,7 @@ namespace Compiler.SyntaxAnalysis
         public event OutputCompiledToWrite NotifyOutputCompiledToWrite;
         private Dictionary<SyntaxStateTransition, SyntaxMachineState> transitions;
         public SyntaxMachineState CurrentState { get; private set; }
-        private int variableCounter = 0;
-        private Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
+        private VariableTable variables;
         private SyntaxEngine engine;
         private SequenceIdLabelCommand sequenceId;
 
@@ -54,10 +53,10 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.REMARK,  TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.GO,      TokenType.END),      SyntaxMachineState.START }
             };
-
+            this.variables = new VariableTable();
             this.fileManager = fileManager;
             this.sequenceId = new SequenceIdLabelCommand(fileManager);
-            this.engine = new SyntaxEngine(fileManager);
+            this.engine = new SyntaxEngine(this.variables, fileManager);
         }
 
         public void ConsumeIdentifiedTokenEvent(Token token) {
@@ -103,7 +102,7 @@ namespace Compiler.SyntaxAnalysis
 
         public void End() {
             FinalizationCommand final = new FinalizationCommand(this.fileManager);
-            final.AllocateMemorySpaceForVariables(this.variableCounter);
+            final.AllocateMemorySpaceForVariables(this.variables.VariableCounter);
         }
 
         class SyntaxStateTransition {
@@ -132,13 +131,13 @@ namespace Compiler.SyntaxAnalysis
 
         class SyntaxEngine {
             private Dictionary<SyntaxMachineState, ISubStateMachine> subStateMachines;
-
-            public SyntaxEngine(FileManager fileManager) {
+            public SyntaxEngine(VariableTable variables, FileManager fileManager) {
                 this.subStateMachines = new Dictionary<SyntaxMachineState, ISubStateMachine> 
                 {
-                    { SyntaxMachineState.PRINT, new PrintStateMachine(fileManager) },
+                    { SyntaxMachineState.PRINT, new PrintStateMachine(variables, fileManager) },
                     { SyntaxMachineState.REMARK, new RemarkStateMachine(fileManager) },
-                    { SyntaxMachineState.GO, new GoStateMachine(fileManager) }
+                    { SyntaxMachineState.GO, new GoStateMachine(fileManager) },
+                    { SyntaxMachineState.LET, new LetStateMachine(variables, fileManager) },
                 };
             }
 
@@ -151,5 +150,12 @@ namespace Compiler.SyntaxAnalysis
                 
             }
         }
+    }
+    public class VariableTable 
+    {
+        private int variableCounter = 0;
+        public int VariableCounter { get { return this.variableCounter; } }
+        private Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
+        public Dictionary<string, int> VariableToIndex { get { return this.variableToIndex; } } 
     }
 }

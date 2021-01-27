@@ -1,6 +1,7 @@
 using System;
 using FileIO;
 using Compiler.LexicalAnalysis;
+using Compiler.SyntaxAnalysis;
 using System.Collections.Generic;
 
 namespace Compiler.ArmRoutineGenerators
@@ -15,10 +16,10 @@ namespace Compiler.ArmRoutineGenerators
     public class PrintStateMachine : ISubStateMachine {
         private Dictionary<PrintStateTransition, PrintMachineState> transitions;
         public PrintMachineState CurrentState { get; private set; }
-
+        private VariableTable variables;
         private PrintCommand command;
 
-        public PrintStateMachine(FileManager fileManager) {
+        public PrintStateMachine(VariableTable variables, FileManager fileManager) {
             CurrentState = PrintMachineState.START;
             transitions = new Dictionary<PrintStateTransition, PrintMachineState>
             {
@@ -35,7 +36,7 @@ namespace Compiler.ArmRoutineGenerators
                 { new PrintStateTransition(PrintMachineState.PRINT_MULTIPLE, TokenType.COMMA), PrintMachineState.PRINT },
                 { new PrintStateTransition(PrintMachineState.PRINT_MULTIPLE, TokenType.END), PrintMachineState.START },
             };
-
+            this.variables = variables;
             this.command = new PrintCommand(fileManager);
         }
 

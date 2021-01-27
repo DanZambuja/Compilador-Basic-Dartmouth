@@ -17,6 +17,19 @@ print_uart0_loop:
 	bne	print_uart0_loop
 	bx	lr
 
+@ We expect that for a x b, r0 = a and r1 = b, result will be in r0
+mult:
+	cmp r1, #0
+
+	add r0, r0, r0
+	sub r1, r1, 1
+zero_out:
+	ldr r0, =0
+
+
+div:
+
+
 	.global	c_entry
 	@ This is our entry point from startup.s
 c_entry:

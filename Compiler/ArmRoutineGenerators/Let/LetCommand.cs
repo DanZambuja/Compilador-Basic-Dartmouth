@@ -1,6 +1,4 @@
-using System;
 using FileIO;
-using Compiler.LexicalAnalysis;
 
 namespace Compiler.ArmRoutineGenerators
 {
@@ -17,6 +15,7 @@ namespace Compiler.ArmRoutineGenerators
             this.variableIndex = index;
         }
 
+        // Actual value expected to be on r0
         public void GenerateStoreInMemInstructions() {
             string instructions = string.Empty;
 

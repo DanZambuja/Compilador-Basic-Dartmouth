@@ -1,4 +1,3 @@
-using System;
 using FileIO;
 using Compiler.LexicalAnalysis;
 
