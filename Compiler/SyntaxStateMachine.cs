@@ -153,9 +153,7 @@ namespace Compiler.SyntaxAnalysis
     }
     public class VariableTable 
     {
-        private int variableCounter = 0;
-        public int VariableCounter { get { return this.variableCounter; } }
-        private Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
-        public Dictionary<string, int> VariableToIndex { get { return this.variableToIndex; } } 
+        public int variableCounter = 0;
+        public Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
     }
 }

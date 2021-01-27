@@ -57,6 +57,8 @@ namespace Compiler.ArmRoutineGenerators
 
             if (this.CurrentState == LetMachineState.EQUALS && token.Type == TokenType.END && nextState == LetMachineState.START) {
                 this.exp.Reset();
+                this.variables.variableToIndex[this.variable.Text] = this.variables.variableCounter++;
+                this.command.GenerateStoreInMemInstructions(this.variables.variableToIndex[this.variable.Text]);
             } else if (this.CurrentState == LetMachineState.EQUALS) {
                 this.exp.MoveToNextState(token);
             }

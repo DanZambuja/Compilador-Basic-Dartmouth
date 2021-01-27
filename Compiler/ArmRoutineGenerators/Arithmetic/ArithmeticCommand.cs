@@ -20,10 +20,32 @@ namespace Compiler.ArmRoutineGenerators
         }
 
         public void ConsumeToken(Token token) {
-            
+            if (token.Type == TokenType.CLOSING_BRACES) {
+                this.EvaluateUntilOpeningBraces();
+            } else {
+                this.stack.Push(token);
+            }
+        }
+
+        private void EvaluateUntilOpeningBraces() {
+            while(this.stack.Count > 0) {
+                Token topOfStack = this.stack.Pop() as Token;
+                this.output.Enqueue(topOfStack);
+                if (topOfStack.Type == TokenType.OPENING_BRACES) {
+                    break;
+                }
+            }
+        }
+
+        private void EvaluateAllThatRemains() {
+            while(this.output.Count > 0) {
+                Token dequeued = this.output.Dequeue() as Token;
+                
+            }
         }
 
         public void EndOfExpression() {
+            this.EvaluateAllThatRemains();
             this.stack.Clear();
             this.output.Clear();
         }
