@@ -30,6 +30,7 @@ namespace Compiler.ArmRoutineGenerators
         private VariableTable variables;
         private FileManager fileManager;
         private Stack operatorS;
+        private Stack rpnStack;
         private Queue outputQ;
 
         public ArithmeticCommand(VariableTable variables, FileManager fileManager) {
@@ -98,11 +99,20 @@ namespace Compiler.ArmRoutineGenerators
         }
 
         private void Evaluate() {
-             Console.WriteLine();
-             foreach(Token el in this.outputQ) {
-                 Console.Write(el.Text + " ");
-             }
-             Console.WriteLine();
+            Console.WriteLine();
+            double result = 0.0;
+            Token firstPop;
+            Token secondPop;
+            foreach(Token token in this.outputQ) {
+                Console.Write(token.Text + " ");
+                if (this.IsOperator(token) || this.IsFunction(token)) {
+                    firstPop = this.rpnStack.Pop() as Token;
+                    secondPop = this.rpnStack.Pop() as Token;
+                } else if (this.IsNumber(token)) {
+                    this.rpnStack.Push(token);
+                }
+            }
+            Console.WriteLine();
         }
 
         public void EndOfExpression() {
