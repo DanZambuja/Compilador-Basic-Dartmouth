@@ -28,7 +28,6 @@ namespace Compiler.SyntaxAnalysis
         private VariableTable variables;
         private SyntaxEngine engine;
         private SequenceIdLabelCommand sequenceId;
-
         private FileManager fileManager;
 
         public SyntaxStateMachine(FileManager fileManager) { 
@@ -102,7 +101,7 @@ namespace Compiler.SyntaxAnalysis
 
         public void End() {
             FinalizationCommand final = new FinalizationCommand(this.fileManager);
-            final.AllocateMemorySpaceForVariables(this.variables.VariableCounter);
+            final.AllocateMemorySpaceForVariables(this.variables.variableCounter);
         }
 
         class SyntaxStateTransition {

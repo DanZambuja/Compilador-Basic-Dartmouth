@@ -46,6 +46,7 @@ namespace Compiler.LexicalAnalysis
         DIV,
         OPENING_BRACES,
         CLOSING_BRACES,
+        POWER,
         ERROR,
         END
     }
@@ -140,8 +141,11 @@ namespace Compiler.LexicalAnalysis
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.LETTER), LexicalMachineState.VAR_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.QUOTE), LexicalMachineState.QUOTED_STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.OPENING_PAR), LexicalMachineState.SPECIAL_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.CLOSING_PAR), LexicalMachineState.SPECIAL_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.EMPTY, AtomType.CONTROL), LexicalMachineState.EMPTY },
+                
 
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.DIGIT), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
@@ -151,6 +155,8 @@ namespace Compiler.LexicalAnalysis
                 
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.OPENING_PAR), LexicalMachineState.SPECIAL_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.CLOSING_PAR), LexicalMachineState.SPECIAL_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.CONTROL), LexicalMachineState.EMPTY },
 
@@ -171,6 +177,8 @@ namespace Compiler.LexicalAnalysis
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.OPENING_PAR), LexicalMachineState.SPECIAL_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.CLOSING_PAR), LexicalMachineState.SPECIAL_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.DELIMITER), LexicalMachineState.EMPTY },
                 { new LexicalStateTransition(LexicalMachineState.SPECIAL_TOKEN, AtomType.CONTROL), LexicalMachineState.EMPTY },
 
@@ -185,9 +193,7 @@ namespace Compiler.LexicalAnalysis
 
         private void UpdateTokenState(AsciiAtom command) {
             if (command.Category != AtomType.CONTROL && 
-                command.Category != AtomType.DELIMITER &&
-                command.Category != AtomType.OPENING_PAR &&
-                command.Category != AtomType.CLOSING_PAR) {
+                command.Category != AtomType.DELIMITER) {
                 if (this.CurrentState == LexicalMachineState.ARRAY_TOKEN) {
                     this.indexOrSize = Int32.Parse(command.Symbol.ToString());
                 } 
@@ -240,7 +246,7 @@ namespace Compiler.LexicalAnalysis
             if (nextState == LexicalMachineState.EMPTY && command.Category == AtomType.CONTROL ||
                 nextState == LexicalMachineState.EMPTY && this.CurrentState != LexicalMachineState.EMPTY ||
                 nextState == LexicalMachineState.SPECIAL_TOKEN && 
-                (this.CurrentState == LexicalMachineState.STRING_TOKEN || this.CurrentState == LexicalMachineState.INT_TOKEN) ||
+                (this.CurrentState == LexicalMachineState.STRING_TOKEN || this.CurrentState == LexicalMachineState.INT_TOKEN || this.CurrentState == LexicalMachineState.SPECIAL_TOKEN) ||
                 (nextState == LexicalMachineState.INT_TOKEN || nextState == LexicalMachineState.STRING_TOKEN) && 
                 this.CurrentState == LexicalMachineState.SPECIAL_TOKEN) {
                 
