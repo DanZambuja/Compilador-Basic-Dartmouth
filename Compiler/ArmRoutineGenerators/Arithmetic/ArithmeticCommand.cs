@@ -30,13 +30,14 @@ namespace Compiler.ArmRoutineGenerators
         private VariableTable variables;
         private FileManager fileManager;
         private Stack operatorS;
-        private Stack rpnStack;
+        private Stack rpn;
         private Queue outputQ;
 
         public ArithmeticCommand(VariableTable variables, FileManager fileManager) {
             this.variables = variables;
             this.fileManager = fileManager;
             this.operatorS = new Stack();
+            this.rpn = new Stack();
             this.outputQ = new Queue();
         }
 
@@ -98,81 +99,190 @@ namespace Compiler.ArmRoutineGenerators
                 return false;
         }
 
-        private void Evaluate() {
-            Console.WriteLine();
-            double result = 0.0;
-            Token firstPop;
-            Token secondPop;
-            foreach(Token token in this.outputQ) {
-                Console.Write(token.Text + " ");
-                if (this.IsOperator(token) || this.IsFunction(token)) {
-                    firstPop = this.rpnStack.Pop() as Token;
-                    secondPop = this.rpnStack.Pop() as Token;
-                } else if (this.IsNumber(token)) {
-                    this.rpnStack.Push(token);
-                }
-            }
-            Console.WriteLine();
-        }
-
-        public void EndOfExpression() {
+        private void RemoveRemainingOperators() {
             while (this.operatorS.Count > 0) {
                     this.outputQ.Enqueue(this.operatorS.Pop());
             }
+        }
+
+        public void EndOfExpression() {
+            this.RemoveRemainingOperators();
+            this.ShowOutputContents();
             this.Evaluate();
             this.operatorS.Clear();
             this.outputQ.Clear();
         }
 
-        private void Sum() {
-            string instructions = string.Empty;
+        private void ShowOutputContents() {
+            Console.WriteLine();
+            foreach (Token token in this.outputQ) {
+                Console.Write(token.Text + " ");
+            }
+            Console.WriteLine();
+        }
 
-            instructions += "   ldr r1, =" + "\n";
-            instructions += "   adr r2, mem\n";
-            instructions += "   ldr r3, =4\n";
-            instructions += "   mul r5, r1, r3\n";
-            instructions += "   add r2, r2, r5\n";
-            instructions += "   str r0, [r2]\n";
+        private void Evaluate() {
+            if (this.outputQ.Count == 1) {
+                Token value = this.outputQ.Dequeue() as Token;
+                this.SingleValueAttribuition(value);
+            } else if (this.outputQ.Count > 1) {
+                int acc = 0;
+                while (this.outputQ.Count > 1) {
+                    Token token = this.outputQ.Dequeue() as Token;
+                    if (this.IsOperator(token) || this.IsFunction(token)) {
+                        Token first = this.rpn.Pop() as Token;
+                        Token second = this.rpn.Pop() as Token;
+                        this.CreateInstructions(first, second, token, acc);
+                        acc--;
+                        this.rpn.Push(new Token(TokenType.CALCULATED_RESULT));
+                    } else if (this.IsNumber(token)){
+                        acc++;
+                        this.rpn.Push(token);
+                    }
+                }
+                this.GetResultToMainRegister();
+            } 
+        }
+
+        private void CreateInstructions(Token first, Token second, Token operation, int accumulator) {
+            string instructions = string.Empty;
+            string[] registers = this.GetCurrentRegisters(accumulator);
+
+            switch (first.Type) {
+                case TokenType.INT:
+                    instructions += "   ldr " + registers[1] + ", =" + first.Text + "\n";
+                    break;
+                case TokenType.VAR:
+                    instructions += "   ldr r1, =" + this.variables.variableToIndex[first.Text] + "\n";
+                    instructions += "   adr r2, mem\n";
+                    instructions += "   ldr r3, =4\n";
+                    instructions += "   mul r5, r1, r3\n";
+                    instructions += "   add r2, r2, r5\n";
+                    instructions += "   ldr " + registers[1] + ", [r2]\n";
+                    break;
+                case TokenType.ARRAY_ELEMENT:
+                    instructions += "   ldr r1, =" + this.variables.variableToIndex[first.Text] + "\n";
+                    instructions += "   adr r2, mem\n";
+                    instructions += "   ldr r3, =4\n";
+                    instructions += "   mul r5, r1, r3\n";
+                    instructions += "   add r2, r2, r5\n";
+                    instructions += "   ldr " + registers[1] + ", [r2]\n";
+                    break;
+                case TokenType.CALCULATED_RESULT:
+                    break;
+            }
+
+            switch (second.Type) {
+                case TokenType.INT:
+                    instructions += "   ldr " + registers[0] + ", =" + second.Text + "\n";
+                    break;
+                case TokenType.VAR:
+                    instructions += "   ldr r1, =" + this.variables.variableToIndex[second.Text] + "\n";
+                    instructions += "   adr r2, mem\n";
+                    instructions += "   ldr r3, =4\n";
+                    instructions += "   mul r5, r1, r3\n";
+                    instructions += "   add r2, r2, r5\n";
+                    instructions += "   ldr " + registers[0] + ", [r2]\n";
+                    break;
+                case TokenType.ARRAY_ELEMENT:
+                    instructions += "   ldr r1, =" + this.variables.variableToIndex[second.Text] + "\n";
+                    instructions += "   adr r2, mem\n";
+                    instructions += "   ldr r3, =4\n";
+                    instructions += "   mul r5, r1, r3\n";
+                    instructions += "   add r2, r2, r5\n";
+                    instructions += "   ldr " + registers[0] + ", [r2]\n";
+                    break;
+                case TokenType.CALCULATED_RESULT:
+                    break;
+            }
+
+            switch (operation.Type) {
+                case TokenType.PLUS:
+                    instructions += "   add r0, " + registers[0] + ", " + registers[1] + "\n";
+                    break;
+                case TokenType.MINUS:
+                    instructions += "   sub r0, " + registers[0] + ", " + registers[1] + "\n";
+                    break;
+                case TokenType.MULT:
+                    instructions += "   mul r0, " + registers[0] + ", " + registers[1] + "\n";
+                    break;
+                case TokenType.DIV:
+                    throw new Exception("Division not yet implemented");
+                case TokenType.POWER:
+                    throw new Exception("Power not yet implemented");
+            }
+
+
+            string register = this.GetCurrentRegisterForAccumulation(accumulator);
+            instructions += "   mov " + register + ", r0\n";
 
             this.fileManager.WriteInstructionsToFile(instructions);
         }
 
-        private void Sub() {
+        private void SingleValueAttribuition(Token value) {
             string instructions = string.Empty;
 
-            instructions += "   ldr r1, =" + "\n";
-            instructions += "   adr r2, mem\n";
-            instructions += "   ldr r3, =4\n";
-            instructions += "   mul r5, r1, r3\n";
-            instructions += "   add r2, r2, r5\n";
-            instructions += "   str r0, [r2]\n";
+            switch (value.Type) {
+                case TokenType.INT:
+                    instructions += "   ldr r0, =" + value.Text + "\n";
+                    break;
+                case TokenType.VAR:
+                    instructions += "   ldr r1, =" + this.variables.variableToIndex[value.Text] + "\n";
+                    instructions += "   adr r2, mem\n";
+                    instructions += "   ldr r3, =4\n";
+                    instructions += "   mul r5, r1, r3\n";
+                    instructions += "   add r2, r2, r5\n";
+                    instructions += "   ldr r0, [r2]\n";
+                    break;
+                case TokenType.ARRAY_ELEMENT:
+                    instructions += "   ldr r1, =" + this.variables.variableToIndex[value.Text] + "\n";
+                    instructions += "   adr r2, mem\n";
+                    instructions += "   ldr r3, =4\n";
+                    instructions += "   mul r5, r1, r3\n";
+                    instructions += "   add r2, r2, r5\n";
+                    instructions += "   ldr r0, [r2]\n";
+                    break;
+            }
 
             this.fileManager.WriteInstructionsToFile(instructions);
         }
 
-        private void Mult() {
+        private void GetResultToMainRegister() {
             string instructions = string.Empty;
 
-            instructions += "   ldr r1, =" + "\n";
-            instructions += "   adr r2, mem\n";
-            instructions += "   ldr r3, =4\n";
-            instructions += "   mul r5, r1, r3\n";
-            instructions += "   add r2, r2, r5\n";
-            instructions += "   str r0, [r2]\n";
+            instructions += "   mov r0, r12\n";
 
             this.fileManager.WriteInstructionsToFile(instructions);
         }
-        private void Div() {
-            string instructions = string.Empty;
 
-            instructions += "   ldr r1, =" + "\n";
-            instructions += "   adr r2, mem\n";
-            instructions += "   ldr r3, =4\n";
-            instructions += "   mul r5, r1, r3\n";
-            instructions += "   add r2, r2, r5\n";
-            instructions += "   str r0, [r2]\n";
+        private string[] GetCurrentRegisters(int accumulator) {
+            if (accumulator >= 11) {
+                throw new Exception("Arithmetic expression too complex not enough registers!");
+            } else if (accumulator < 2){
+                throw new Exception("Not enough operands");
+            } else {
+                int firstRegister = 12 - (accumulator - 2);
+                int secondRegister = 12 - (accumulator - 1);
 
-            this.fileManager.WriteInstructionsToFile(instructions);
+                string[] registers = new string[2];
+
+                registers[0] = "r" + firstRegister;
+                registers[1] = "r" + secondRegister;
+
+                return registers; 
+            }
         }
+
+        private string GetCurrentRegisterForAccumulation(int accumulator) {
+            if (accumulator >= 11) {
+                throw new Exception("Arithmetic expression too complex not enough registers!");
+            } else if (accumulator < 2){
+                throw new Exception("Not enough operands");
+            } else {
+                int firstRegister = 12 - (accumulator - 2);
+                string freeRegister = "r" + firstRegister;
+                return freeRegister; 
+            }
+        }   
     }
 }

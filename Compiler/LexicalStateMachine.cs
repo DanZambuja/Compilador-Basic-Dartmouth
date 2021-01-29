@@ -47,6 +47,7 @@ namespace Compiler.LexicalAnalysis
         OPENING_BRACES,
         CLOSING_BRACES,
         POWER,
+        CALCULATED_RESULT,
         ERROR,
         END
     }
@@ -120,6 +121,11 @@ namespace Compiler.LexicalAnalysis
         public Token() {
             this.Text = string.Empty;
             this.Type = TokenType.END;
+        }
+
+        public Token(TokenType type) {
+            this.Text = string.Empty;
+            this.Type = TokenType.CALCULATED_RESULT;
         }
     }
     
