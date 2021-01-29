@@ -13,9 +13,13 @@ namespace Compiler.SyntaxAnalysis
         LET,
         FOR,
         DIM,
+        DATA,
         READ,
         REMARK,
-        GO
+        GO,
+        IF,
+        GOSUB,
+        DEF
     }
 
     public delegate void OutputCompiledToWrite(string armCommand);
