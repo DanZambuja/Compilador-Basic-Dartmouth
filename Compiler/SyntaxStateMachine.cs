@@ -60,9 +60,9 @@ namespace Compiler.SyntaxAnalysis
 
         public void ConsumeIdentifiedTokenEvent(Token token) {
             if (token.Type == TokenType.ARRAY || token.Type == TokenType.ARRAY_ELEMENT) {
-                Console.WriteLine("S1: " + token.Text + " - " + token.IndexOrSize.ToString() + " - " + token.Type.ToString());
+                Console.WriteLine("Syntax1: " + token.Text + " - " + token.IndexOrSize.ToString() + " - " + token.Type.ToString());
             } else {
-                Console.WriteLine("S2: " + token.Text + " - " + token.Type.ToString());
+                Console.WriteLine("Syntax2: " + token.Text + " - " + token.Type.ToString());
             }
             this.MoveNext(token);
         }
@@ -86,7 +86,7 @@ namespace Compiler.SyntaxAnalysis
                 this.engine.ConsumeToken(this.CurrentState, token, nextState);
             
             
-            Console.WriteLine("S: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            Console.WriteLine("Syntax: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }

@@ -44,10 +44,11 @@ namespace Compiler.ArmRoutineGenerators
         // Use Shunting Yard to convert to Reverse Polish Notation
         public void ConsumeToken(Token token) {
             if (token.Type == TokenType.END) {
-                while (this.operatorS.Count >= 0) {
-                    this.outputQ.Enqueue(this.operatorS.Pop());
-                }
-                this.Evaluate();
+                Console.WriteLine("END TOKEN");
+                // while (this.operatorS.Count >= 0) {
+                //     this.outputQ.Enqueue(this.operatorS.Pop());
+                // }
+                // this.Evaluate();
             } else if (this.IsNumber(token)) {
                 this.outputQ.Enqueue(token);
             } else if (this.IsFunction(token)) {
@@ -111,6 +112,7 @@ namespace Compiler.ArmRoutineGenerators
             this.Evaluate();
             this.operatorS.Clear();
             this.outputQ.Clear();
+            this.rpn.Clear();
         }
 
         private void ShowOutputContents() {
@@ -123,11 +125,12 @@ namespace Compiler.ArmRoutineGenerators
 
         private void Evaluate() {
             if (this.outputQ.Count == 1) {
+                Console.WriteLine("SINGLE VALUE");
                 Token value = this.outputQ.Dequeue() as Token;
                 this.SingleValueAttribuition(value);
             } else if (this.outputQ.Count > 1) {
                 int acc = 0;
-                while (this.outputQ.Count > 1) {
+                while (this.outputQ.Count >= 1) {
                     Token token = this.outputQ.Dequeue() as Token;
                     if (this.IsOperator(token) || this.IsFunction(token)) {
                         Token first = this.rpn.Pop() as Token;
@@ -211,7 +214,6 @@ namespace Compiler.ArmRoutineGenerators
                 case TokenType.POWER:
                     throw new Exception("Power not yet implemented");
             }
-
 
             string register = this.GetCurrentRegisterForAccumulation(accumulator);
             instructions += "   mov " + register + ", r0\n";

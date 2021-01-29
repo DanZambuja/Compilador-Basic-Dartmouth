@@ -63,7 +63,7 @@ namespace Compiler.ArmRoutineGenerators
                 this.exp.MoveToNextState(token);
             }
 
-            Console.WriteLine("P: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            Console.WriteLine("LET: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }

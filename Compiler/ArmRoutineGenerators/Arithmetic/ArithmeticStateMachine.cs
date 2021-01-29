@@ -68,7 +68,7 @@ namespace Compiler.ArmRoutineGenerators
                 this.command.EndOfExpression();
             }
 
-            Console.WriteLine("P: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            Console.WriteLine("Arithmetic: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }

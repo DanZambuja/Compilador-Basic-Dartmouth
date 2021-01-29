@@ -224,7 +224,7 @@ namespace Compiler.LexicalAnalysis
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
 
-            Console.WriteLine("L :" + this.CurrentState + " -> " + nextState + " : " + command.ToString());
+            Console.WriteLine("Lexical :" + this.CurrentState + " -> " + nextState + " : " + command.ToString());
             
             return nextState;
         }
