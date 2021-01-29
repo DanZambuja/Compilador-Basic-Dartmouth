@@ -25,11 +25,11 @@ LABEL_10:
    ldr r12, =25
    add r0, r12, r11
    mov r12, r0
+   ldr r10, =4
    ldr r11, =7
+   mul r0, r11, r10
+   mov r11, r0
    sub r0, r12, r11
-   mov r12, r0
-   ldr r11, =4
-   mul r0, r12, r11
    mov r12, r0
    ldr r10, =10
    ldr r11, =4
@@ -37,14 +37,14 @@ LABEL_10:
    mov r11, r0
    add r0, r12, r11
    mov r12, r0
-   ldr r11, =15
-   add r0, r12, r11
-   mov r12, r0
-   ldr r9, =5
-   ldr r10, =9
+   ldr r8, =5
+   ldr r9, =9
+   mul r0, r9, r8
+   mov r9, r0
+   ldr r10, =3
    mul r0, r10, r9
    mov r10, r0
-   ldr r11, =3
+   ldr r11, =15
    mul r0, r11, r10
    mov r11, r0
    mov r0, r12

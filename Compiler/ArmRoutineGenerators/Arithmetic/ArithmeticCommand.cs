@@ -13,7 +13,7 @@ namespace Compiler.ArmRoutineGenerators
         public int Associativeness { get; private set; }
         // 0: left 1: right
         public Precedence(int value, int associativeness) {
-            this.Value = Value;
+            this.Value = value;
             this.Associativeness = associativeness;
         }
     }
@@ -56,12 +56,12 @@ namespace Compiler.ArmRoutineGenerators
                 if (this.operatorS.Count > 0) {
                     Token topOfStack = this.operatorS.Peek() as Token;
                     while (this.operatorS.Count > 0 && topOfStack.Type != TokenType.OPENING_BRACES &&
-                          ((this.precedenceTable[topOfStack.Type].Value > this.precedenceTable[token.Type].Value) || (this.precedenceTable[topOfStack.Type].Value == this.precedenceTable[token.Type].Value && this.precedenceTable[token.Type].Associativeness == 0))) {
+                            ((this.precedenceTable[topOfStack.Type].Value > this.precedenceTable[token.Type].Value) || (this.precedenceTable[topOfStack.Type].Value == this.precedenceTable[token.Type].Value && 
+                            this.precedenceTable[token.Type].Associativeness == 0))) {
                         this.outputQ.Enqueue(this.operatorS.Pop());
                     }
                 }
                 this.operatorS.Push(token);
-                
             } else if (token.Type == TokenType.OPENING_BRACES) {
                 this.operatorS.Push(token);
             } else if (token.Type == TokenType.CLOSING_BRACES) {
@@ -101,7 +101,7 @@ namespace Compiler.ArmRoutineGenerators
 
         private void RemoveRemainingOperators() {
             while (this.operatorS.Count > 0) {
-                    this.outputQ.Enqueue(this.operatorS.Pop());
+                this.outputQ.Enqueue(this.operatorS.Pop());
             }
         }
 
