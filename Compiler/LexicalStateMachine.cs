@@ -45,6 +45,11 @@ namespace Compiler.LexicalAnalysis
         MINUS,
         MULT,
         DIV,
+        GREATER_OR_EQUAL,
+        GREATER,
+        LESS,
+        LESS_OR_EQUAL,
+        NOT_EQUAL,
         OPENING_BRACES,
         CLOSING_BRACES,
         POWER,
@@ -65,24 +70,24 @@ namespace Compiler.LexicalAnalysis
             if (state == LexicalMachineState.STRING_TOKEN) {
                 this.Type = this.Text.ToUpper() switch 
                 {
-                    "PRINT" => TokenType.PRINT,
-                    "DIM" => TokenType.DIM,
-                    "LET" => TokenType.LET,
-                    "READ" => TokenType.READ,
-                    "DATA" => TokenType.DATA,
-                    "FOR" => TokenType.FOR,
-                    "TO" => TokenType.TO,
-                    "NEXT" => TokenType.NEXT,
-                    "GO" => TokenType.GO,
-                    "GOTO" => TokenType.GOTO,
-                    "GOSUB" => TokenType.GOSUB,
+                    "PRINT"  => TokenType.PRINT,
+                    "DIM"    => TokenType.DIM,
+                    "LET"    => TokenType.LET,
+                    "READ"   => TokenType.READ,
+                    "DATA"   => TokenType.DATA,
+                    "FOR"    => TokenType.FOR,
+                    "TO"     => TokenType.TO,
+                    "NEXT"   => TokenType.NEXT,
+                    "GO"     => TokenType.GO,
+                    "GOTO"   => TokenType.GOTO,
+                    "GOSUB"  => TokenType.GOSUB,
                     "RETURN" => TokenType.RETURN,
-                    "REM" => TokenType.REMARK,
-                    "IF" => TokenType.IF,
-                    "STEP" => TokenType.STEP,
-                    "THEN" => TokenType.THEN,
-                    "END" => TokenType.FINAL,
-                    _ => TokenType.STRING
+                    "REM"    => TokenType.REMARK,
+                    "IF"     => TokenType.IF,
+                    "STEP"   => TokenType.STEP,
+                    "THEN"   => TokenType.THEN,
+                    "END"    => TokenType.FINAL,
+                    _        => TokenType.STRING
                 };
 
             } else if (state == LexicalMachineState.INT_TOKEN) {
@@ -91,16 +96,21 @@ namespace Compiler.LexicalAnalysis
             } else if (state == LexicalMachineState.SPECIAL_TOKEN) {
                 this.Type = this.Text switch 
                 {
-                    "=" => TokenType.EQUALS,
+                    "="  => TokenType.EQUALS,
                     ":=" => TokenType.EQUALS,
-                    "(" => TokenType.OPENING_BRACES,
-                    ")" => TokenType.CLOSING_BRACES,
-                    "," => TokenType.COMMA,
-                    "+" => TokenType.PLUS,
-                    "-" => TokenType.MINUS,
-                    "*" => TokenType.MULT,
-                    "/" => TokenType.DIV,
-                    _ => TokenType.ERROR
+                    ">"  => TokenType.GREATER,
+                    ">=" => TokenType.GREATER_OR_EQUAL,
+                    "<"  => TokenType.LESS,
+                    "<=" => TokenType.LESS_OR_EQUAL,
+                    "<>" => TokenType.NOT_EQUAL,
+                    "("  => TokenType.OPENING_BRACES,
+                    ")"  => TokenType.CLOSING_BRACES,
+                    ","  => TokenType.COMMA,
+                    "+"  => TokenType.PLUS,
+                    "-"  => TokenType.MINUS,
+                    "*"  => TokenType.MULT,
+                    "/"  => TokenType.DIV,
+                    _    => TokenType.ERROR
                 };
             } else if (state == LexicalMachineState.VAR_TOKEN) {
                 this.Type = TokenType.VAR;

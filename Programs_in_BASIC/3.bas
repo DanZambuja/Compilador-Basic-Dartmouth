@@ -1,6 +1,4 @@
-10 GOSUB 40
-20 PRINT "Show on the end: Hello World!"
-30 END
+10 LET I1 = 10
+20 IF I1 = 10 THEN 40
+30 PRINT "Dont show: Hello World!"
 40 PRINT "Show: Hello World!"
-50 LET I1 = 1145
-60 RETURN

@@ -58,6 +58,7 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.DATA),     SyntaxMachineState.DATA },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.READ),     SyntaxMachineState.READ },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOSUB),    SyntaxMachineState.GOSUB },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.IF),       SyntaxMachineState.IF },
                 
                 
 
@@ -70,6 +71,7 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.DATA,    TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.READ,    TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.GOSUB,   TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.IF,      TokenType.END),      SyntaxMachineState.START },
             };
             this.fileManager    = fileManager;
             this.variables      = new VariableTable();
@@ -165,7 +167,8 @@ namespace Compiler.SyntaxAnalysis
                     { SyntaxMachineState.DIM,       new DimStateMachine   (variables, fileManager) },
                     { SyntaxMachineState.DATA,      new DataStateMachine  (variables, fileManager) },
                     { SyntaxMachineState.READ,      new ReadStateMachine  (variables, fileManager) },
-                    { SyntaxMachineState.GOSUB,     new GoSubStateMachine (variables, fileManager) }
+                    { SyntaxMachineState.GOSUB,     new GoSubStateMachine (variables, fileManager) },
+                    { SyntaxMachineState.IF,        new IfStateMachine    (variables, fileManager) },
                 };
             }
 
