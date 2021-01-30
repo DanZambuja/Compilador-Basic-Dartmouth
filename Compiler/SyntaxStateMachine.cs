@@ -91,7 +91,7 @@ namespace Compiler.SyntaxAnalysis
 
             if ((this.CurrentState == SyntaxMachineState.START || this.CurrentState != SyntaxMachineState.START && token.Type == TokenType.END) && 
                 !transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " +  nextState + "\nToken Text: " + token.Text + " Token Type: " + token.Type.ToString());
+                throw new Exception("Syntax: Invalid transition: " + CurrentState + " -> " +  nextState + "\nToken Text: " + token.Text + " Token Type: " + token.Type.ToString());
 
             if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.INT)
                 this.sequenceId.ConsumeToken(token);
@@ -171,7 +171,11 @@ namespace Compiler.SyntaxAnalysis
     {
         public int currentProgramLine = 0;
         public int variableCounter = 0;
-        public Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
         public int lastGoSubCalled = 0;
+        public Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
+        public Queue<Token> readVariables = new Queue<Token>();
+        public void ResetReadVariables() {
+            this.readVariables.Clear();
+        }
     }
 }

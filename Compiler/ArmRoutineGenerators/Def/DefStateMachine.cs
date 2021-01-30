@@ -32,13 +32,13 @@ namespace Compiler.ArmRoutineGenerators
             DefStateTransition transition = new DefStateTransition(CurrentState, token.Type);
 
             if (!transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
+                throw new Exception("DEF: Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
             if (token.Type != TokenType.END) {
                 this.command.ConsumeToken(token);
             }
 
-            Console.WriteLine("IF: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            Console.WriteLine("DEF: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }

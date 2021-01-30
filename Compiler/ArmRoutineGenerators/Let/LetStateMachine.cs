@@ -53,7 +53,7 @@ namespace Compiler.ArmRoutineGenerators
             }
 
             if (!(this.CurrentState == LetMachineState.EQUALS && token.Type != TokenType.END) && !transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
+                throw new Exception("LET: Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
             if (this.CurrentState == LetMachineState.EQUALS && token.Type == TokenType.END && nextState == LetMachineState.START) {
                 this.exp.Reset();

@@ -41,13 +41,13 @@ namespace Compiler.ArmRoutineGenerators
             DimStateTransition transition = new DimStateTransition(CurrentState, token.Type);
 
             if (!transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
+                throw new Exception("DIM: Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
             if (this.CurrentState == DimMachineState.DIM && token.Type == TokenType.ARRAY) {
                 this.command.ConsumeToken(token);
             }
 
-            Console.WriteLine("IF: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            Console.WriteLine("DIM: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }

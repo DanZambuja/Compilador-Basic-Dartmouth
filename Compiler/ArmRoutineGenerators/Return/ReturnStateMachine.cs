@@ -39,9 +39,9 @@ namespace Compiler.ArmRoutineGenerators
             ReturnStateTransition transition = new ReturnStateTransition(CurrentState, token.Type);
 
             if (!transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
+                throw new Exception("RETURN: Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
-            Console.WriteLine("P: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            Console.WriteLine("RETURN: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }

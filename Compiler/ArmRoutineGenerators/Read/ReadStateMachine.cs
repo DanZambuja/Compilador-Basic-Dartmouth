@@ -34,7 +34,7 @@ namespace Compiler.ArmRoutineGenerators
 
                 { new ReadStateTransition(ReadMachineState.COMMA,        TokenType.VAR),    ReadMachineState.READ_ELEMENT },
                 { new ReadStateTransition(ReadMachineState.COMMA,        TokenType.ARRAY),  ReadMachineState.READ_ELEMENT },
-                { new ReadStateTransition(ReadMachineState.COMMA,        TokenType.END),    ReadMachineState.READ_ELEMENT }
+                { new ReadStateTransition(ReadMachineState.COMMA,        TokenType.END),    ReadMachineState.START }
             };
 
             this.variables = variables;
@@ -48,13 +48,16 @@ namespace Compiler.ArmRoutineGenerators
             ReadStateTransition transition = new ReadStateTransition(CurrentState, token.Type);
 
             if (!transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
+                throw new Exception("READ: Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
-            if (token.Type != TokenType.END) {
+            if (this.CurrentState == ReadMachineState.START) {
+                this.variables.ResetReadVariables();
+            } else if ((this.CurrentState ==  ReadMachineState.READ || this.CurrentState == ReadMachineState.COMMA) && 
+                (token.Type == TokenType.VAR || token.Type == TokenType.ARRAY)) {
                 this.command.ConsumeToken(token);
             }
 
-            Console.WriteLine("IF: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            Console.WriteLine("READ: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }

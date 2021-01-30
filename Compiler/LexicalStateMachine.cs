@@ -221,7 +221,7 @@ namespace Compiler.LexicalAnalysis
             LexicalStateTransition transition = new LexicalStateTransition(CurrentState, command);
             
             if (!transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + command);
+                throw new Exception("Lexical: Invalid transition: " + CurrentState + " -> " + command);
 
             Console.WriteLine("Lexical :" + this.CurrentState + " -> " + nextState + " : " + command.ToString());
             

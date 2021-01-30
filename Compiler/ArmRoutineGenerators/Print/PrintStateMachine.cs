@@ -47,13 +47,13 @@ namespace Compiler.ArmRoutineGenerators
             PrintStateTransition transition = new PrintStateTransition(CurrentState, token.Type);
 
             if (!transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
+                throw new Exception("PRINT: Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
             if (this.CurrentState == PrintMachineState.PRINT && token.Type != TokenType.END) {
                 this.command.ConsumeToken(token);
             }
 
-            Console.WriteLine("P: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            Console.WriteLine("PRINT: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }

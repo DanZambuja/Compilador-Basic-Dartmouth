@@ -60,7 +60,7 @@ namespace Compiler.ArmRoutineGenerators
             ArithmeticStateTransition transition = new ArithmeticStateTransition(CurrentState, token.Type);
 
             if (!transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
+                throw new Exception("Arithmetic: Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
             if (token.Type != TokenType.END) {
                 this.command.ConsumeToken(token);

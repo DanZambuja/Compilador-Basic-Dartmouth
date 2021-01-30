@@ -46,13 +46,13 @@ namespace Compiler.ArmRoutineGenerators
             DataStateTransition transition = new DataStateTransition(CurrentState, token.Type);
 
             if (!transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
+                throw new Exception("DATA: Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
-            if (token.Type != TokenType.END) {
+            if ((this.CurrentState == DataMachineState.DATA || this.CurrentState == DataMachineState.COMMA) && token.Type == TokenType.INT) {
                 this.command.ConsumeToken(token);
             }
 
-            Console.WriteLine("IF: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            Console.WriteLine("DATA: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
             return nextState;
         }
