@@ -1,28 +1,38 @@
 using System;
 using FileIO;
 using Compiler.LexicalAnalysis;
+using Compiler.SyntaxAnalysis;
 using System.Collections.Generic;
 
 namespace Compiler.ArmRoutineGenerators
 {
     public enum GoSubMachineState
     {
-        START
+        START,
+        GOSUB,
+        LABEL
     }
 
     public class GoSubStateMachine : ISubStateMachine {
         private Dictionary<GoSubStateTransition, GoSubMachineState> transitions;
         public GoSubMachineState CurrentState { get; private set; }
         private GoSubCommand command;
-
-        public GoSubStateMachine(FileManager fileManager) {
+        private VariableTable variables;
+        
+        public GoSubStateMachine(VariableTable variables, FileManager fileManager) {
             CurrentState = GoSubMachineState.START;
             transitions = new Dictionary<GoSubStateTransition, GoSubMachineState>
             {
-                { new GoSubStateTransition(GoSubMachineState.START, TokenType.END), GoSubMachineState.START }
+                { new GoSubStateTransition(GoSubMachineState.START, TokenType.END), GoSubMachineState.START },
+                { new GoSubStateTransition(GoSubMachineState.START, TokenType.GOSUB), GoSubMachineState.GOSUB },
+                
+                { new GoSubStateTransition(GoSubMachineState.GOSUB, TokenType.INT), GoSubMachineState.LABEL },
+
+                { new GoSubStateTransition(GoSubMachineState.LABEL, TokenType.END), GoSubMachineState.START }
             };
 
-            this.command = new GoSubCommand(fileManager);
+            this.variables = variables;
+            this.command = new GoSubCommand(variables, fileManager);
         }
 
 
@@ -34,7 +44,7 @@ namespace Compiler.ArmRoutineGenerators
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
-            if (token.Type != TokenType.END) {
+            if (this.CurrentState == GoSubMachineState.GOSUB && token.Type == TokenType.INT) {
                 this.command.ConsumeToken(token);
             }
 

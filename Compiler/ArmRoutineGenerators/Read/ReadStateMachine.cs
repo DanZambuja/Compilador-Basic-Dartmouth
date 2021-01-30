@@ -8,7 +8,10 @@ namespace Compiler.ArmRoutineGenerators
 {
     public enum ReadMachineState
     {
-        START
+        START,
+        READ,
+        READ_ELEMENT,
+        COMMA
     }
 
     public class ReadStateMachine : ISubStateMachine {
@@ -21,7 +24,17 @@ namespace Compiler.ArmRoutineGenerators
             CurrentState = ReadMachineState.START;
             transitions = new Dictionary<ReadStateTransition, ReadMachineState>
             {
-                { new ReadStateTransition(ReadMachineState.START, TokenType.END), ReadMachineState.START }
+                { new ReadStateTransition(ReadMachineState.START,        TokenType.READ),   ReadMachineState.READ },
+
+                { new ReadStateTransition(ReadMachineState.READ,         TokenType.VAR),    ReadMachineState.READ_ELEMENT },
+                { new ReadStateTransition(ReadMachineState.READ,         TokenType.ARRAY),  ReadMachineState.READ_ELEMENT },
+
+                { new ReadStateTransition(ReadMachineState.READ_ELEMENT, TokenType.COMMA),  ReadMachineState.READ_ELEMENT },
+                { new ReadStateTransition(ReadMachineState.READ_ELEMENT, TokenType.END),    ReadMachineState.START },
+
+                { new ReadStateTransition(ReadMachineState.COMMA,        TokenType.VAR),    ReadMachineState.READ_ELEMENT },
+                { new ReadStateTransition(ReadMachineState.COMMA,        TokenType.ARRAY),  ReadMachineState.READ_ELEMENT },
+                { new ReadStateTransition(ReadMachineState.COMMA,        TokenType.END),    ReadMachineState.READ_ELEMENT }
             };
 
             this.variables = variables;

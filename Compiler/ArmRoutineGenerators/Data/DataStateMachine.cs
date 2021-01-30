@@ -24,17 +24,15 @@ namespace Compiler.ArmRoutineGenerators
             CurrentState = DataMachineState.START;
             transitions = new Dictionary<DataStateTransition, DataMachineState>
             {
-                { new DataStateTransition(DataMachineState.START, TokenType.DATA), DataMachineState.DATA },
+                { new DataStateTransition(DataMachineState.START,        TokenType.DATA),  DataMachineState.DATA },
 
-                { new DataStateTransition(DataMachineState.DATA, TokenType.VAR), DataMachineState.DATA_ELEMENT },
-                { new DataStateTransition(DataMachineState.DATA, TokenType.ARRAY), DataMachineState.DATA_ELEMENT },
+                { new DataStateTransition(DataMachineState.DATA,         TokenType.INT),   DataMachineState.DATA_ELEMENT },
 
                 { new DataStateTransition(DataMachineState.DATA_ELEMENT, TokenType.COMMA), DataMachineState.DATA_ELEMENT },
-                { new DataStateTransition(DataMachineState.DATA_ELEMENT, TokenType.END), DataMachineState.START },
+                { new DataStateTransition(DataMachineState.DATA_ELEMENT, TokenType.END),   DataMachineState.START }  ,
 
-                { new DataStateTransition(DataMachineState.COMMA, TokenType.VAR), DataMachineState.DATA_ELEMENT },
-                { new DataStateTransition(DataMachineState.COMMA, TokenType.ARRAY), DataMachineState.DATA_ELEMENT },
-                { new DataStateTransition(DataMachineState.COMMA, TokenType.END), DataMachineState.DATA_ELEMENT }
+                { new DataStateTransition(DataMachineState.COMMA,        TokenType.INT),   DataMachineState.DATA_ELEMENT },
+                { new DataStateTransition(DataMachineState.COMMA,        TokenType.END),   DataMachineState.DATA_ELEMENT }
             };
 
             this.variables = variables;

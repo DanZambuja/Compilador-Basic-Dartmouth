@@ -19,6 +19,7 @@ namespace Compiler.SyntaxAnalysis
         GO,
         IF,
         GOSUB,
+        RETURN,
         DEF
     }
 
@@ -50,6 +51,8 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOTO),     SyntaxMachineState.GO },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.DATA),     SyntaxMachineState.DATA },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.READ),     SyntaxMachineState.READ },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOSUB),    SyntaxMachineState.GOSUB },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.RETURN),   SyntaxMachineState.RETURN },
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT,   TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.LET,     TokenType.END),      SyntaxMachineState.START },
@@ -58,11 +61,13 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.REMARK,  TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.GO,      TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.DATA,    TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.READ,    TokenType.END),      SyntaxMachineState.START }
+                { new SyntaxStateTransition(SyntaxMachineState.READ,    TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.GOSUB,   TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.RETURN,  TokenType.END),      SyntaxMachineState.START },
             };
             this.variables = new VariableTable();
             this.fileManager = fileManager;
-            this.sequenceId = new SequenceIdLabelCommand(fileManager);
+            this.sequenceId = new SequenceIdLabelCommand(this.variables, fileManager);
             this.engine = new SyntaxEngine(this.variables, fileManager);
         }
 
@@ -147,7 +152,9 @@ namespace Compiler.SyntaxAnalysis
                     { SyntaxMachineState.LET,       new LetStateMachine   (variables, fileManager) },
                     { SyntaxMachineState.DIM,       new DimStateMachine   (variables, fileManager) },
                     { SyntaxMachineState.DATA,      new DataStateMachine  (variables, fileManager) },
-                    { SyntaxMachineState.READ,      new ReadStateMachine  (variables, fileManager) }
+                    { SyntaxMachineState.READ,      new ReadStateMachine  (variables, fileManager) },
+                    { SyntaxMachineState.GOSUB,     new GoSubStateMachine (variables, fileManager) },
+                    { SyntaxMachineState.RETURN,    new ReturnStateMachine(variables, fileManager) }
                 };
             }
 
@@ -157,13 +164,14 @@ namespace Compiler.SyntaxAnalysis
                 } else if (currentState != SyntaxMachineState.START) {
                     this.subStateMachines[currentState].MoveToNextState(token);
                 }
-                
             }
         }
     }
     public class VariableTable 
     {
+        public int currentProgramLine = 0;
         public int variableCounter = 0;
         public Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
+        public int lastGoSubCalled = 0;
     }
 }

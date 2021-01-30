@@ -1,27 +1,24 @@
-using System;
+using FileIO;
 using Compiler.LexicalAnalysis;
 using Compiler.SyntaxAnalysis;
-using FileIO;
 
 namespace Compiler.ArmRoutineGenerators
 {
-    public class SequenceIdLabelCommand : ICommand
+    public class ReturnCommand : ICommand
     {
-
         private readonly FileManager fileManager;
         private readonly VariableTable variables;
 
-        public SequenceIdLabelCommand(VariableTable variables, FileManager fileManager) {
+        public ReturnCommand(VariableTable variables, FileManager fileManager) {
             this.fileManager = fileManager;
             this.variables = variables;
         }
-
         public void ConsumeToken(Token token) {
-            this.variables.currentProgramLine = int.Parse(token.Text);
+            string instruction = string.Empty;
 
-            string label = "LABEL_" + token.Text + ":\n";
+            instruction += "    b LABEL_" + this.variables.lastGoSubCalled + "\n";
 
-            this.fileManager.WriteInstructionsToFile(label);
+            this.fileManager.WriteInstructionsToFile(instruction);
         }
     }
 }
