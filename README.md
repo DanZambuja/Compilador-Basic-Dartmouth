@@ -13,6 +13,6 @@ DotNet Core 3.1 instalado
 Para compilar e executar o código deve utilizar o comando dotnet build
 Em seguida executar os comandos que se encontram no arquivo ./CompiledProgram/run.txt
 Para tal deve entrar na pasta ./CompiledProgram
-Em seguida executar ./run.txts
+Em seguida executar ./run.txt
 
 ## Devido a forma que o emulador roda é necessário fechar a força o terminal após execução do código

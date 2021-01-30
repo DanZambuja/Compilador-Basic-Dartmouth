@@ -1,28 +1,37 @@
 using System;
 using FileIO;
 using Compiler.LexicalAnalysis;
+using Compiler.SyntaxAnalysis;
 using System.Collections.Generic;
 
 namespace Compiler.ArmRoutineGenerators
 {
     public enum DimMachineState
     {
-        START
+        START,
+        DIM,
+        ARRAY
     }
 
     public class DimStateMachine : ISubStateMachine {
         private Dictionary<DimStateTransition, DimMachineState> transitions;
         public DimMachineState CurrentState { get; private set; }
         private DimCommand command;
+        private VariableTable variables;
 
-        public DimStateMachine(FileManager fileManager) {
+        public DimStateMachine(VariableTable variables, FileManager fileManager) {
             CurrentState = DimMachineState.START;
             transitions = new Dictionary<DimStateTransition, DimMachineState>
             {
-                { new DimStateTransition(DimMachineState.START, TokenType.END), DimMachineState.START }
-            };
+                { new DimStateTransition(DimMachineState.START, TokenType.END), DimMachineState.START },
+                { new DimStateTransition(DimMachineState.START, TokenType.DIM), DimMachineState.DIM },
 
-            this.command = new DimCommand(fileManager);
+                { new DimStateTransition(DimMachineState.DIM, TokenType.ARRAY), DimMachineState.ARRAY },
+
+                { new DimStateTransition(DimMachineState.ARRAY, TokenType.END), DimMachineState.START }
+            };
+            this.variables = variables;
+            this.command = new DimCommand(variables, fileManager);
         }
 
 
@@ -34,7 +43,7 @@ namespace Compiler.ArmRoutineGenerators
             if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
-            if (token.Type != TokenType.END) {
+            if (this.CurrentState == DimMachineState.DIM && token.Type == TokenType.ARRAY) {
                 this.command.ConsumeToken(token);
             }
 

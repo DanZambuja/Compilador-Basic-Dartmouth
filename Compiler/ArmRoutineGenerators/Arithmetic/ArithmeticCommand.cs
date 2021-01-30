@@ -44,11 +44,10 @@ namespace Compiler.ArmRoutineGenerators
         // Use Shunting Yard to convert to Reverse Polish Notation
         public void ConsumeToken(Token token) {
             if (token.Type == TokenType.END) {
-                Console.WriteLine("END TOKEN");
-                // while (this.operatorS.Count >= 0) {
-                //     this.outputQ.Enqueue(this.operatorS.Pop());
-                // }
-                // this.Evaluate();
+                while (this.operatorS.Count >= 0) {
+                    this.outputQ.Enqueue(this.operatorS.Pop());
+                }
+                this.Evaluate();
             } else if (this.IsNumber(token)) {
                 this.outputQ.Enqueue(token);
             } else if (this.IsFunction(token)) {
@@ -94,7 +93,7 @@ namespace Compiler.ArmRoutineGenerators
         }
 
         private bool IsNumber(Token token) {
-            if (token.Type == TokenType.INT || token.Type == TokenType.VAR || token.Type == TokenType.ARRAY_ELEMENT)
+            if (token.Type == TokenType.INT || token.Type == TokenType.VAR || token.Type == TokenType.ARRAY)
                 return true;
             else
                 return false;
@@ -125,7 +124,6 @@ namespace Compiler.ArmRoutineGenerators
 
         private void Evaluate() {
             if (this.outputQ.Count == 1) {
-                Console.WriteLine("SINGLE VALUE");
                 Token value = this.outputQ.Dequeue() as Token;
                 this.SingleValueAttribuition(value);
             } else if (this.outputQ.Count > 1) {
@@ -163,8 +161,9 @@ namespace Compiler.ArmRoutineGenerators
                     instructions += "   add r2, r2, r5\n";
                     instructions += "   ldr " + registers[1] + ", [r2]\n";
                     break;
-                case TokenType.ARRAY_ELEMENT:
-                    instructions += "   ldr r1, =" + this.variables.variableToIndex[first.Text] + "\n";
+                case TokenType.ARRAY:
+                    int indexOfArrayElement = this.variables.variableToIndex[first.Text] + first.IndexOrSize;
+                    instructions += "   ldr r1, =" + indexOfArrayElement + "\n";
                     instructions += "   adr r2, mem\n";
                     instructions += "   ldr r3, =4\n";
                     instructions += "   mul r5, r1, r3\n";
@@ -187,8 +186,9 @@ namespace Compiler.ArmRoutineGenerators
                     instructions += "   add r2, r2, r5\n";
                     instructions += "   ldr " + registers[0] + ", [r2]\n";
                     break;
-                case TokenType.ARRAY_ELEMENT:
-                    instructions += "   ldr r1, =" + this.variables.variableToIndex[second.Text] + "\n";
+                case TokenType.ARRAY:
+                    int indexOfArrayElement = this.variables.variableToIndex[first.Text] + first.IndexOrSize;
+                    instructions += "   ldr r1, =" + indexOfArrayElement + "\n";
                     instructions += "   adr r2, mem\n";
                     instructions += "   ldr r3, =4\n";
                     instructions += "   mul r5, r1, r3\n";
@@ -236,8 +236,9 @@ namespace Compiler.ArmRoutineGenerators
                     instructions += "   add r2, r2, r5\n";
                     instructions += "   ldr r0, [r2]\n";
                     break;
-                case TokenType.ARRAY_ELEMENT:
-                    instructions += "   ldr r1, =" + this.variables.variableToIndex[value.Text] + "\n";
+                case TokenType.ARRAY:
+                    int indexOfArrayElement = this.variables.variableToIndex[value.Text] + value.IndexOrSize;
+                    instructions += "   ldr r1, =" + indexOfArrayElement + "\n";
                     instructions += "   adr r2, mem\n";
                     instructions += "   ldr r3, =4\n";
                     instructions += "   mul r5, r1, r3\n";

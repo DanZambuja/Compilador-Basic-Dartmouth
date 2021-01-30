@@ -1,6 +1,7 @@
 using System;
 using FileIO;
 using Compiler.LexicalAnalysis;
+using Compiler.SyntaxAnalysis;
 using System.Collections.Generic;
 
 namespace Compiler.ArmRoutineGenerators
@@ -14,15 +15,17 @@ namespace Compiler.ArmRoutineGenerators
         private Dictionary<ReadStateTransition, ReadMachineState> transitions;
         public ReadMachineState CurrentState { get; private set; }
         private ReadCommand command;
+        private VariableTable variables;
 
-        public ReadStateMachine(FileManager fileManager) {
+        public ReadStateMachine(VariableTable variables, FileManager fileManager) {
             CurrentState = ReadMachineState.START;
             transitions = new Dictionary<ReadStateTransition, ReadMachineState>
             {
                 { new ReadStateTransition(ReadMachineState.START, TokenType.END), ReadMachineState.START }
             };
 
-            this.command = new ReadCommand(fileManager);
+            this.variables = variables;
+            this.command = new ReadCommand(variables, fileManager);
         }
 
 

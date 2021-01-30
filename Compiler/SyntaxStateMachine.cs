@@ -47,14 +47,18 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.DIM),      SyntaxMachineState.DIM },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.REMARK),   SyntaxMachineState.REMARK },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GO),       SyntaxMachineState.GO },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOTO),       SyntaxMachineState.GO },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOTO),     SyntaxMachineState.GO },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.DATA),     SyntaxMachineState.DATA },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.READ),     SyntaxMachineState.READ },
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT,   TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.LET,     TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.FOR,     TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.DIM,     TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.REMARK,  TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.GO,      TokenType.END),      SyntaxMachineState.START }
+                { new SyntaxStateTransition(SyntaxMachineState.GO,      TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.DATA,    TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.READ,    TokenType.END),      SyntaxMachineState.START }
             };
             this.variables = new VariableTable();
             this.fileManager = fileManager;
@@ -137,10 +141,13 @@ namespace Compiler.SyntaxAnalysis
             public SyntaxEngine(VariableTable variables, FileManager fileManager) {
                 this.subStateMachines = new Dictionary<SyntaxMachineState, ISubStateMachine> 
                 {
-                    { SyntaxMachineState.PRINT, new PrintStateMachine(variables, fileManager) },
-                    { SyntaxMachineState.REMARK, new RemarkStateMachine(fileManager) },
-                    { SyntaxMachineState.GO, new GoStateMachine(fileManager) },
-                    { SyntaxMachineState.LET, new LetStateMachine(variables, fileManager) },
+                    { SyntaxMachineState.REMARK,    new RemarkStateMachine(           fileManager) },
+                    { SyntaxMachineState.GO,        new GoStateMachine    (           fileManager) },
+                    { SyntaxMachineState.PRINT,     new PrintStateMachine (variables, fileManager) },
+                    { SyntaxMachineState.LET,       new LetStateMachine   (variables, fileManager) },
+                    { SyntaxMachineState.DIM,       new DimStateMachine   (variables, fileManager) },
+                    { SyntaxMachineState.DATA,      new DataStateMachine  (variables, fileManager) },
+                    { SyntaxMachineState.READ,      new ReadStateMachine  (variables, fileManager) }
                 };
             }
 
