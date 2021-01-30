@@ -11,6 +11,7 @@ namespace Compiler.ArmRoutineGenerators
         public void AllocateMemorySpaceForVariables(int variableCounter) {
             string data = string.Empty;
 
+            data += "END:\n";
             data += "   b .\n";
 
             if (variableCounter > 0) {

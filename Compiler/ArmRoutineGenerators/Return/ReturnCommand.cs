@@ -4,7 +4,7 @@ using Compiler.SyntaxAnalysis;
 
 namespace Compiler.ArmRoutineGenerators
 {
-    public class ReturnCommand : ICommand
+    public class ReturnCommand
     {
         private readonly FileManager fileManager;
         private readonly VariableTable variables;
@@ -13,7 +13,7 @@ namespace Compiler.ArmRoutineGenerators
             this.fileManager = fileManager;
             this.variables = variables;
         }
-        public void ConsumeToken(Token token) {
+        public void ReturnInstructions() {
             string instruction = string.Empty;
 
             instruction += "    b LABEL_" + this.variables.lastGoSubCalled + "\n";

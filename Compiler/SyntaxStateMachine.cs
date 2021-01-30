@@ -20,7 +20,8 @@ namespace Compiler.SyntaxAnalysis
         IF,
         GOSUB,
         RETURN,
-        DEF
+        DEF,
+        FINAL
     }
 
     public delegate void OutputCompiledToWrite(string armCommand);
@@ -33,14 +34,19 @@ namespace Compiler.SyntaxAnalysis
         private VariableTable variables;
         private SyntaxEngine engine;
         private SequenceIdLabelCommand sequenceId;
+        private EndCommand endCommand;
+        private ReturnCommand returnCommand;
         private FileManager fileManager;
 
         public SyntaxStateMachine(FileManager fileManager) { 
             CurrentState = SyntaxMachineState.START;
             transitions = new Dictionary<SyntaxStateTransition, SyntaxMachineState> 
             {
-                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.INT), SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.START, TokenType.END), SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.INT),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.RETURN),   SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.FINAL),    SyntaxMachineState.START },
+                
 
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.PRINT),    SyntaxMachineState.PRINT },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.LET),      SyntaxMachineState.LET },
@@ -52,7 +58,8 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.DATA),     SyntaxMachineState.DATA },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.READ),     SyntaxMachineState.READ },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOSUB),    SyntaxMachineState.GOSUB },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.RETURN),   SyntaxMachineState.RETURN },
+                
+                
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT,   TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.LET,     TokenType.END),      SyntaxMachineState.START },
@@ -63,12 +70,13 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.DATA,    TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.READ,    TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.GOSUB,   TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.RETURN,  TokenType.END),      SyntaxMachineState.START },
             };
-            this.variables = new VariableTable();
-            this.fileManager = fileManager;
-            this.sequenceId = new SequenceIdLabelCommand(this.variables, fileManager);
-            this.engine = new SyntaxEngine(this.variables, fileManager);
+            this.fileManager    = fileManager;
+            this.variables      = new VariableTable();
+            this.endCommand     = new EndCommand(fileManager);
+            this.sequenceId     = new SequenceIdLabelCommand(this.variables, fileManager);
+            this.returnCommand  = new ReturnCommand(this.variables, fileManager);
+            this.engine         = new SyntaxEngine(this.variables, fileManager);
         }
 
         public void ConsumeIdentifiedTokenEvent(Token token) {
@@ -95,6 +103,10 @@ namespace Compiler.SyntaxAnalysis
 
             if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.INT)
                 this.sequenceId.ConsumeToken(token);
+            else if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.FINAL)
+                this.endCommand.EndInstruction();
+            else if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.RETURN)
+                this.returnCommand.ReturnInstructions();
             else
                 this.engine.ConsumeToken(this.CurrentState, token, nextState);
             
@@ -153,8 +165,7 @@ namespace Compiler.SyntaxAnalysis
                     { SyntaxMachineState.DIM,       new DimStateMachine   (variables, fileManager) },
                     { SyntaxMachineState.DATA,      new DataStateMachine  (variables, fileManager) },
                     { SyntaxMachineState.READ,      new ReadStateMachine  (variables, fileManager) },
-                    { SyntaxMachineState.GOSUB,     new GoSubStateMachine (variables, fileManager) },
-                    { SyntaxMachineState.RETURN,    new ReturnStateMachine(variables, fileManager) }
+                    { SyntaxMachineState.GOSUB,     new GoSubStateMachine (variables, fileManager) }
                 };
             }
 

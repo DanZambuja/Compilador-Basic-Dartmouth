@@ -1,4 +1,5 @@
+END:
    b .
 mem:
- .space 12
+ .space 4
 

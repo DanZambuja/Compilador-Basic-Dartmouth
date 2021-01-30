@@ -50,7 +50,8 @@ namespace Compiler.LexicalAnalysis
         POWER,
         CALCULATED_RESULT,
         ERROR,
-        END
+        END,
+        FINAL
     }
 
     public class Token {
@@ -80,6 +81,7 @@ namespace Compiler.LexicalAnalysis
                     "IF" => TokenType.IF,
                     "STEP" => TokenType.STEP,
                     "THEN" => TokenType.THEN,
+                    "END" => TokenType.FINAL,
                     _ => TokenType.STRING
                 };
 
