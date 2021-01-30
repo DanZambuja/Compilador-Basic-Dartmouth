@@ -28,7 +28,7 @@ namespace Compiler.ArmRoutineGenerators
 
                 { new DataStateTransition(DataMachineState.DATA,         TokenType.INT),   DataMachineState.DATA_ELEMENT },
 
-                { new DataStateTransition(DataMachineState.DATA_ELEMENT, TokenType.COMMA), DataMachineState.DATA_ELEMENT },
+                { new DataStateTransition(DataMachineState.DATA_ELEMENT, TokenType.COMMA), DataMachineState.COMMA },
                 { new DataStateTransition(DataMachineState.DATA_ELEMENT, TokenType.END),   DataMachineState.START }  ,
 
                 { new DataStateTransition(DataMachineState.COMMA,        TokenType.INT),   DataMachineState.DATA_ELEMENT },

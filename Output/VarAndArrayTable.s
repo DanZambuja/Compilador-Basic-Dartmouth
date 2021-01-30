@@ -1,4 +1,4 @@
    b .
 mem:
- .space 20
+ .space 12
 

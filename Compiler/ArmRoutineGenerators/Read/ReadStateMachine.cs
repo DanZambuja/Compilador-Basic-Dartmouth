@@ -29,7 +29,7 @@ namespace Compiler.ArmRoutineGenerators
                 { new ReadStateTransition(ReadMachineState.READ,         TokenType.VAR),    ReadMachineState.READ_ELEMENT },
                 { new ReadStateTransition(ReadMachineState.READ,         TokenType.ARRAY),  ReadMachineState.READ_ELEMENT },
 
-                { new ReadStateTransition(ReadMachineState.READ_ELEMENT, TokenType.COMMA),  ReadMachineState.READ_ELEMENT },
+                { new ReadStateTransition(ReadMachineState.READ_ELEMENT, TokenType.COMMA),  ReadMachineState.COMMA },
                 { new ReadStateTransition(ReadMachineState.READ_ELEMENT, TokenType.END),    ReadMachineState.START },
 
                 { new ReadStateTransition(ReadMachineState.COMMA,        TokenType.VAR),    ReadMachineState.READ_ELEMENT },
