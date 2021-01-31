@@ -1,4 +1,2 @@
-10 LET I = (-3 + 1)
-20 IF I = -2 THEN 40
-30 PRINT "DONT SHOW"
-40 PRINT "SHOW"
+10 LET I = 1 + 3 + 5) * (3 - 5)
+20 PRINT "SHOW"

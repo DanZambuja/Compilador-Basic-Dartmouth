@@ -22,7 +22,8 @@ namespace Compiler.SyntaxAnalysis
         GOSUB,
         RETURN,
         DEF,
-        FINAL
+        FINAL,
+        PANIC_MODE
     }
 
     public delegate void OutputCompiledToWrite(string armCommand);
@@ -43,35 +44,36 @@ namespace Compiler.SyntaxAnalysis
             CurrentState = SyntaxMachineState.START;
             transitions = new Dictionary<SyntaxStateTransition, SyntaxMachineState> 
             {
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.INT),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.RETURN),   SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.FINAL),    SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.INT),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.RETURN),   SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.FINAL),    SyntaxMachineState.START },
                 
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.PRINT),    SyntaxMachineState.PRINT },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.LET),      SyntaxMachineState.LET },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.FOR),      SyntaxMachineState.FOR },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.DIM),      SyntaxMachineState.DIM },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.REMARK),   SyntaxMachineState.REMARK },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GO),       SyntaxMachineState.GO },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOTO),     SyntaxMachineState.GO },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.DATA),     SyntaxMachineState.DATA },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.READ),     SyntaxMachineState.READ },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOSUB),    SyntaxMachineState.GOSUB },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.IF),       SyntaxMachineState.IF },
-                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.NEXT),     SyntaxMachineState.NEXT },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.PRINT),    SyntaxMachineState.PRINT },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.LET),      SyntaxMachineState.LET },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.FOR),      SyntaxMachineState.FOR },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.DIM),      SyntaxMachineState.DIM },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.REMARK),   SyntaxMachineState.REMARK },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.GO),       SyntaxMachineState.GO },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.GOTO),     SyntaxMachineState.GO },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.DATA),     SyntaxMachineState.DATA },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.READ),     SyntaxMachineState.READ },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.GOSUB),    SyntaxMachineState.GOSUB },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.IF),       SyntaxMachineState.IF },
+                { new SyntaxStateTransition(SyntaxMachineState.START,         TokenType.NEXT),     SyntaxMachineState.NEXT },
 
-                { new SyntaxStateTransition(SyntaxMachineState.PRINT,   TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.LET,     TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.FOR,     TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.DIM,     TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.REMARK,  TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.GO,      TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.DATA,    TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.READ,    TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.GOSUB,   TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.IF,      TokenType.END),      SyntaxMachineState.START },
-                { new SyntaxStateTransition(SyntaxMachineState.NEXT,    TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.PRINT,         TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.LET,           TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.FOR,           TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.DIM,           TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.REMARK,        TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.GO,            TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.DATA,          TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.READ,          TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.GOSUB,         TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.IF,            TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.NEXT,          TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.PANIC_MODE,    TokenType.END),      SyntaxMachineState.START },
             };
             this.fileManager    = fileManager;
             this.variables      = new VariableTable();
@@ -99,21 +101,34 @@ namespace Compiler.SyntaxAnalysis
             SyntaxMachineState nextState = this.CurrentState;
             SyntaxStateTransition transition = new SyntaxStateTransition(CurrentState, token.Type);
 
-            if ((this.CurrentState == SyntaxMachineState.START || this.CurrentState != SyntaxMachineState.START && token.Type == TokenType.END) && 
-                !transitions.TryGetValue(transition, out nextState))
-                throw new Exception("Syntax: Invalid transition: " + CurrentState + " -> " +  nextState + "\nToken Text: " + token.Text + " Token Type: " + token.Type.ToString());
+            if (this.CurrentState == SyntaxMachineState.PANIC_MODE && token.Type != TokenType.END) {
+                Console.WriteLine("Syntax: " + this.CurrentState + ": " + token.Text);
+                return nextState;
+            } else if (this.CurrentState == SyntaxMachineState.PANIC_MODE && token.Type == TokenType.END) {
+                this.CurrentState = SyntaxMachineState.START;
+            }
 
-            if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.INT)
-                this.sequenceId.ConsumeToken(token);
-            else if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.FINAL)
-                this.endCommand.EndInstruction();
-            else if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.RETURN)
-                this.returnCommand.ReturnInstructions();
-            else
-                this.engine.ConsumeToken(this.CurrentState, token, nextState);
+            try {
+                if ((this.CurrentState == SyntaxMachineState.START || this.CurrentState != SyntaxMachineState.START && token.Type == TokenType.END) && 
+                    !transitions.TryGetValue(transition, out nextState))
+                    throw new Exception("Syntax: Invalid transition: " + CurrentState + " -> " +  nextState + "\nToken Text: " + token.Text + " Token Type: " + token.Type.ToString());
+
+                if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.INT)
+                    this.sequenceId.ConsumeToken(token);
+                else if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.FINAL)
+                    this.endCommand.EndInstruction();
+                else if (this.CurrentState == SyntaxMachineState.START && token.Type == TokenType.RETURN)
+                    this.returnCommand.ReturnInstructions();
+                else
+                    this.engine.ConsumeToken(this.CurrentState, token, nextState);
+                
+                
+                Console.WriteLine("Syntax: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
             
-            
-            Console.WriteLine("Syntax: " + this.CurrentState + " -> " + nextState + ": " + token.Text);
+            }
+            catch {
+                nextState = SyntaxMachineState.PANIC_MODE;
+            }   
             
             return nextState;
         }

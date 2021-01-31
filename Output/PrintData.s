@@ -1,2 +1,1 @@
-PRINT_1: .ascii "DONT SHOW\012\000"
-PRINT_2: .ascii "SHOW\012\000"
+PRINT_1: .ascii "SHOW\012\000"
