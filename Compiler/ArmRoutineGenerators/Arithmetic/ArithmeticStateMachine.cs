@@ -25,6 +25,7 @@ namespace Compiler.ArmRoutineGenerators
                 { new ArithmeticStateTransition(ArithmeticMachineState.START, TokenType.END), ArithmeticMachineState.START },
                 { new ArithmeticStateTransition(ArithmeticMachineState.START, TokenType.INT), ArithmeticMachineState.EXP },
                 { new ArithmeticStateTransition(ArithmeticMachineState.START, TokenType.VAR), ArithmeticMachineState.EXP },
+                { new ArithmeticStateTransition(ArithmeticMachineState.START, TokenType.ARRAY), ArithmeticMachineState.EXP },
                 { new ArithmeticStateTransition(ArithmeticMachineState.START, TokenType.PLUS), ArithmeticMachineState.EXP },
                 { new ArithmeticStateTransition(ArithmeticMachineState.START, TokenType.MINUS), ArithmeticMachineState.EXP },
                 { new ArithmeticStateTransition(ArithmeticMachineState.START, TokenType.MULT), ArithmeticMachineState.EXP },
@@ -34,6 +35,7 @@ namespace Compiler.ArmRoutineGenerators
 
                 { new ArithmeticStateTransition(ArithmeticMachineState.EXP, TokenType.INT), ArithmeticMachineState.EXP },
                 { new ArithmeticStateTransition(ArithmeticMachineState.EXP, TokenType.VAR), ArithmeticMachineState.EXP },
+                { new ArithmeticStateTransition(ArithmeticMachineState.EXP, TokenType.ARRAY), ArithmeticMachineState.EXP },
                 { new ArithmeticStateTransition(ArithmeticMachineState.EXP, TokenType.PLUS), ArithmeticMachineState.EXP },
                 { new ArithmeticStateTransition(ArithmeticMachineState.EXP, TokenType.MINUS), ArithmeticMachineState.EXP },
                 { new ArithmeticStateTransition(ArithmeticMachineState.EXP, TokenType.MULT), ArithmeticMachineState.EXP },

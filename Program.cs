@@ -6,7 +6,7 @@ namespace Project
     {
         static void Main(string[] args)
         {
-            string basicProgramPath = "./Programs_in_BASIC/3.bas";
+            string basicProgramPath = "./Programs_in_BASIC/6.bas";
             string instructionsFile = "./Output/Instructions.s";
             string printDataFile = "./Output/PrintData.s";
             string varAndArrayTableFile = "./Output/VarAndArrayTable.s";

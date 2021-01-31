@@ -118,7 +118,7 @@ namespace Compiler.LexicalAnalysis
                 this.Type = TokenType.QUOTED_STRING;
             } else if (command.Category == AtomType.CONTROL) {
                 this.Type = TokenType.END;
-            }else {
+            } else {
                 this.Type = TokenType.ERROR;
             }
         }
