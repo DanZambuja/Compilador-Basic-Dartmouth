@@ -59,6 +59,8 @@ namespace Compiler.ArmRoutineGenerators
                             ((this.precedenceTable[topOfStack.Type].Value > this.precedenceTable[token.Type].Value) || (this.precedenceTable[topOfStack.Type].Value == this.precedenceTable[token.Type].Value && 
                             this.precedenceTable[token.Type].Associativeness == 0))) {
                         this.outputQ.Enqueue(this.operatorS.Pop());
+                        if (this.operatorS.Count > 0)
+                            topOfStack = this.operatorS.Peek() as Token;
                     }
                 }
                 this.operatorS.Push(token);
@@ -66,8 +68,11 @@ namespace Compiler.ArmRoutineGenerators
                 this.operatorS.Push(token);
             } else if (token.Type == TokenType.CLOSING_BRACES) {
                 if (this.operatorS.Count > 0) {
-                    for (Token topOfStack = this.operatorS.Peek() as Token; topOfStack.Type != TokenType.OPENING_BRACES; topOfStack = this.operatorS.Peek() as Token) {
+                    Token topOfStack = this.operatorS.Peek() as Token;
+                    while (topOfStack.Type != TokenType.OPENING_BRACES && this.operatorS.Count > 0) {
                         this.outputQ.Enqueue(this.operatorS.Pop());
+                        if (this.operatorS.Count > 0)
+                            topOfStack = this.operatorS.Peek() as Token;
                     }
                 }
                 if (this.operatorS.Count > 0 && (this.operatorS.Peek() as Token).Type == TokenType.OPENING_BRACES) {
@@ -126,7 +131,11 @@ namespace Compiler.ArmRoutineGenerators
             if (this.outputQ.Count == 1) {
                 Token value = this.outputQ.Dequeue() as Token;
                 this.SingleValueAttribuition(value);
-            } else if (this.outputQ.Count > 1) {
+            } else if (this.outputQ.Count == 2) {
+                Token number = this.outputQ.Dequeue() as Token;
+                Token sign = this.outputQ.Dequeue() as Token;
+                this.SignedSingleValueAttribuition(number, sign);
+            } else if (this.outputQ.Count > 2) {
                 int acc = 0;
                 while (this.outputQ.Count >= 1) {
                     Token token = this.outputQ.Dequeue() as Token;
@@ -244,6 +253,41 @@ namespace Compiler.ArmRoutineGenerators
                     instructions += "   mul r5, r1, r3\n";
                     instructions += "   add r2, r2, r5\n";
                     instructions += "   ldr r0, [r2]\n";
+                    break;
+            }
+
+            this.fileManager.WriteInstructionsToFile(instructions);
+        }
+
+        private void SignedSingleValueAttribuition(Token value, Token sign) {
+            string instructions = string.Empty;
+
+            switch (value.Type) {
+                case TokenType.INT:
+                    instructions += "   ldr r0, =" + sign.Text + value.Text + "\n";
+                    break;
+                case TokenType.VAR:
+                    instructions += "   ldr r1, =" + this.variables.variableToIndex[value.Text] + "\n";
+                    instructions += "   adr r2, mem\n";
+                    instructions += "   ldr r3, =4\n";
+                    instructions += "   mul r5, r1, r3\n";
+                    instructions += "   add r2, r2, r5\n";
+                    instructions += "   ldr r0, [r2]\n";
+                    instructions += "   ldr r2, =" + sign.Text + "1\n";
+                    instructions += "   mul r3, r0, r2\n";
+                    instructions += "   mov r0, r3\n";
+                    break;
+                case TokenType.ARRAY:
+                    int indexOfArrayElement = this.variables.variableToIndex[value.Text] + value.IndexOrSize;
+                    instructions += "   ldr r1, =" + indexOfArrayElement + "\n";
+                    instructions += "   adr r2, mem\n";
+                    instructions += "   ldr r3, =4\n";
+                    instructions += "   mul r5, r1, r3\n";
+                    instructions += "   add r2, r2, r5\n";
+                    instructions += "   ldr r0, [r2]\n";
+                    instructions += "   ldr r2, =" + sign.Text + "1\n";
+                    instructions += "   mul r3, r0, r2\n";
+                    instructions += "   mov r0, r3\n";
                     break;
             }
 
