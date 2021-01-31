@@ -20,7 +20,6 @@ namespace Compiler.ArmRoutineGenerators
         private Dictionary<IfStateTransition, IfMachineState> transitions;
         public IfMachineState CurrentState { get; private set; }
         private IfCommand command;
-        private VariableTable variables;
         private ArithmeticStateMachine exp;
         private Token comparison = null;
         private int destination = 0;

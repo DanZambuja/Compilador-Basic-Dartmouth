@@ -12,6 +12,7 @@ namespace Compiler.SyntaxAnalysis
         PRINT,
         LET,
         FOR,
+        NEXT,
         DIM,
         DATA,
         READ,
@@ -47,7 +48,6 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.FINAL),    SyntaxMachineState.START },
                 
-
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.PRINT),    SyntaxMachineState.PRINT },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.LET),      SyntaxMachineState.LET },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.FOR),      SyntaxMachineState.FOR },
@@ -59,8 +59,7 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.READ),     SyntaxMachineState.READ },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.GOSUB),    SyntaxMachineState.GOSUB },
                 { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.IF),       SyntaxMachineState.IF },
-                
-                
+                { new SyntaxStateTransition(SyntaxMachineState.START,   TokenType.NEXT),     SyntaxMachineState.NEXT },
 
                 { new SyntaxStateTransition(SyntaxMachineState.PRINT,   TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.LET,     TokenType.END),      SyntaxMachineState.START },
@@ -72,6 +71,7 @@ namespace Compiler.SyntaxAnalysis
                 { new SyntaxStateTransition(SyntaxMachineState.READ,    TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.GOSUB,   TokenType.END),      SyntaxMachineState.START },
                 { new SyntaxStateTransition(SyntaxMachineState.IF,      TokenType.END),      SyntaxMachineState.START },
+                { new SyntaxStateTransition(SyntaxMachineState.NEXT,    TokenType.END),      SyntaxMachineState.START },
             };
             this.fileManager    = fileManager;
             this.variables      = new VariableTable();
@@ -169,6 +169,8 @@ namespace Compiler.SyntaxAnalysis
                     { SyntaxMachineState.READ,      new ReadStateMachine  (variables, fileManager) },
                     { SyntaxMachineState.GOSUB,     new GoSubStateMachine (variables, fileManager) },
                     { SyntaxMachineState.IF,        new IfStateMachine    (variables, fileManager) },
+                    { SyntaxMachineState.FOR,       new ForStateMachine   (variables, fileManager) },
+                    { SyntaxMachineState.NEXT,      new NextStateMachine  (variables, fileManager) },
                 };
             }
 
@@ -183,13 +185,14 @@ namespace Compiler.SyntaxAnalysis
     }
     public class VariableTable 
     {
-        public int currentProgramLine = 0;
-        public int variableCounter = 0;
-        public int lastGoSubCalled = 0;
-        public Dictionary<string, int> variableToIndex = new Dictionary<string, int>();
-        public Queue<Token> readVariables = new Queue<Token>();
+        public int currentProgramLine = 0; // linha atual de execucao
+        public int variableCounter = 0; // contador de quantas variaveis foram declaradas para separar espaço suficiente na memória
+        public int lastGoSubCalled = 0; // indica a linha de retorno para o ultimo GoSub chamado
+        public Dictionary<string, int> variableToIndex = new Dictionary<string, int>(); // mapa de indices das variaveis declaradas
+        public Dictionary<string, int> variableToLoopStart = new Dictionary<string, int>(); // mapa do inicio (linha) do loop correspondente a cada variavel
+        public Queue<Token> readVariables = new Queue<Token>(); // fila para variaveis que receberam comando read, e terão dados inseridos via comando data
         public void ResetReadVariables() {
-            this.readVariables.Clear();
+            this.readVariables.Clear(); // limpa fila de variaveis caso dados inseridos nao forem suficientes para completar as variaveis listadas em read
         }
     }
 }

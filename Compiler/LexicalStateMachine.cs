@@ -172,6 +172,7 @@ namespace Compiler.LexicalAnalysis
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.LETTER), LexicalMachineState.STRING_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.OPENING_PAR), LexicalMachineState.ARRAY_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
+                { new LexicalStateTransition(LexicalMachineState.VAR_TOKEN, AtomType.CONTROL), LexicalMachineState.EMPTY },
                 
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.DIGIT), LexicalMachineState.INT_TOKEN },
                 { new LexicalStateTransition(LexicalMachineState.INT_TOKEN, AtomType.SPECIAL), LexicalMachineState.SPECIAL_TOKEN },
