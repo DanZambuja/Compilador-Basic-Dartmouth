@@ -59,7 +59,8 @@ namespace Compiler.ArmRoutineGenerators
             } else if (!transitions.TryGetValue(transition, out nextState))
                 throw new Exception("Invalid transition: " + CurrentState + " -> " + nextState + "\n" + token.Text + " " + token.Type);
 
-            if (nextState == IfMachineState.COMPARISON || nextState == IfMachineState.DESTINATION) {
+            if ((nextState == IfMachineState.COMPARISON && this.IsComparator(token)) || 
+                (nextState == IfMachineState.DESTINATION && token.Type == TokenType.THEN)) {
                 this.exp.Reset();
 
                 if (nextState == IfMachineState.COMPARISON && this.IsComparator(token)) {
