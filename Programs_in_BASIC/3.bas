@@ -1,4 +1,4 @@
-10 LET I = 1 + 2 - 7 * (1 - 3)
-20 IF I = 17 THEN 40
+10 LET I = (-3 + 1)
+20 IF I = -2 THEN 40
 30 PRINT "DONT SHOW"
 40 PRINT "SHOW"

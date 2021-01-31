@@ -141,9 +141,13 @@ namespace Compiler.ArmRoutineGenerators
                     Token token = this.outputQ.Dequeue() as Token;
                     if (this.IsOperator(token) || this.IsFunction(token)) {
                         Token first = this.rpn.Pop() as Token;
-                        Token second = this.rpn.Pop() as Token;
-                        this.CreateInstructions(first, second, token, acc);
-                        acc--;
+                        if (this.rpn.Count == 0) {
+                            this.SignedSingleValueAttribuition(first, token);
+                        } else {
+                            Token second = this.rpn.Pop() as Token;
+                            this.CreateInstructions(first, second, token, acc);
+                            acc--;
+                        }
                         this.rpn.Push(new Token(TokenType.CALCULATED_RESULT));
                     } else if (this.IsNumber(token)){
                         acc++;
@@ -264,7 +268,7 @@ namespace Compiler.ArmRoutineGenerators
 
             switch (value.Type) {
                 case TokenType.INT:
-                    instructions += "   ldr r0, =" + sign.Text + value.Text + "\n";
+                    instructions += "   ldr r12, =" + sign.Text + value.Text + "\n";
                     break;
                 case TokenType.VAR:
                     instructions += "   ldr r1, =" + this.variables.variableToIndex[value.Text] + "\n";
@@ -275,7 +279,7 @@ namespace Compiler.ArmRoutineGenerators
                     instructions += "   ldr r0, [r2]\n";
                     instructions += "   ldr r2, =" + sign.Text + "1\n";
                     instructions += "   mul r3, r0, r2\n";
-                    instructions += "   mov r0, r3\n";
+                    instructions += "   mov r12, r3\n";
                     break;
                 case TokenType.ARRAY:
                     int indexOfArrayElement = this.variables.variableToIndex[value.Text] + value.IndexOrSize;
@@ -287,7 +291,7 @@ namespace Compiler.ArmRoutineGenerators
                     instructions += "   ldr r0, [r2]\n";
                     instructions += "   ldr r2, =" + sign.Text + "1\n";
                     instructions += "   mul r3, r0, r2\n";
-                    instructions += "   mov r0, r3\n";
+                    instructions += "   mov r12, r3\n";
                     break;
             }
 
