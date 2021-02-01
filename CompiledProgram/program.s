@@ -22,7 +22,11 @@ print_uart0_loop:
 c_entry:
 LABEL_10:
 LABEL_20:
+LABEL_30:
    ldr r0, =PRINT_1
+   bl print_uart0
+LABEL_40:
+   ldr r0, =PRINT_2
    bl print_uart0
 END:
    b .
@@ -33,4 +37,5 @@ UART0DR:
 	.word	0x101F1000 @ This is the UART0 address on a versatileboard
 	.section	.rodata.str1.4,"aMS",%progbits,1
 
-PRINT_1: .ascii "SHOW\012\000"
+PRINT_1: .ascii "Dont show if I exists\012\000"
+PRINT_2: .ascii "SHOW\012\000"

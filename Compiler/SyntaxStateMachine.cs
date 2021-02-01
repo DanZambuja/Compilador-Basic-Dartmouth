@@ -173,6 +173,7 @@ namespace Compiler.SyntaxAnalysis
         class SyntaxEngine {
             private Dictionary<SyntaxMachineState, ISubStateMachine> subStateMachines;
             public SyntaxEngine(VariableTable variables, FileManager fileManager) {
+
                 this.subStateMachines = new Dictionary<SyntaxMachineState, ISubStateMachine> 
                 {
                     { SyntaxMachineState.REMARK,    new RemarkStateMachine(           fileManager) },
