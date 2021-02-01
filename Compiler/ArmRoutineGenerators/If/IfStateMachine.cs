@@ -24,7 +24,7 @@ namespace Compiler.ArmRoutineGenerators
         private Token comparison = null;
         private int destination = 0;
 
-        public IfStateMachine(VariableTable variables, FileManager fileManager) {
+        public IfStateMachine(ArithmeticStateMachine exp, VariableTable variables, FileManager fileManager) {
             CurrentState = IfMachineState.START;
             transitions = new Dictionary<IfStateTransition, IfMachineState>
             {
@@ -44,7 +44,7 @@ namespace Compiler.ArmRoutineGenerators
             };
 
             this.command = new IfCommand(variables, fileManager);
-            this.exp = new ArithmeticStateMachine(variables, fileManager);
+            this.exp = exp;
         }
 
 

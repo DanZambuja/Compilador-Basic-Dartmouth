@@ -172,21 +172,23 @@ namespace Compiler.SyntaxAnalysis
 
         class SyntaxEngine {
             private Dictionary<SyntaxMachineState, ISubStateMachine> subStateMachines;
+            private ArithmeticStateMachine exp;
             public SyntaxEngine(VariableTable variables, FileManager fileManager) {
+                this.exp = new ArithmeticStateMachine(variables, fileManager);
 
                 this.subStateMachines = new Dictionary<SyntaxMachineState, ISubStateMachine> 
                 {
-                    { SyntaxMachineState.REMARK,    new RemarkStateMachine(           fileManager) },
-                    { SyntaxMachineState.GO,        new GoStateMachine    (           fileManager) },
-                    { SyntaxMachineState.PRINT,     new PrintStateMachine (variables, fileManager) },
-                    { SyntaxMachineState.LET,       new LetStateMachine   (variables, fileManager) },
-                    { SyntaxMachineState.DIM,       new DimStateMachine   (variables, fileManager) },
-                    { SyntaxMachineState.DATA,      new DataStateMachine  (variables, fileManager) },
-                    { SyntaxMachineState.READ,      new ReadStateMachine  (variables, fileManager) },
-                    { SyntaxMachineState.GOSUB,     new GoSubStateMachine (variables, fileManager) },
-                    { SyntaxMachineState.IF,        new IfStateMachine    (variables, fileManager) },
-                    { SyntaxMachineState.FOR,       new ForStateMachine   (variables, fileManager) },
-                    { SyntaxMachineState.NEXT,      new NextStateMachine  (variables, fileManager) },
+                    { SyntaxMachineState.REMARK,    new RemarkStateMachine(                      fileManager) },
+                    { SyntaxMachineState.GO,        new GoStateMachine    (                      fileManager) },
+                    { SyntaxMachineState.PRINT,     new PrintStateMachine (           variables, fileManager) },
+                    { SyntaxMachineState.NEXT,      new NextStateMachine  (           variables, fileManager) },
+                    { SyntaxMachineState.DIM,       new DimStateMachine   (           variables, fileManager) },
+                    { SyntaxMachineState.DATA,      new DataStateMachine  (           variables, fileManager) },
+                    { SyntaxMachineState.READ,      new ReadStateMachine  (           variables, fileManager) },
+                    { SyntaxMachineState.GOSUB,     new GoSubStateMachine (           variables, fileManager) },
+                    { SyntaxMachineState.IF,        new IfStateMachine    (this.exp,  variables, fileManager) },
+                    { SyntaxMachineState.FOR,       new ForStateMachine   (this.exp,  variables, fileManager) },
+                    { SyntaxMachineState.LET,       new LetStateMachine   (this.exp,  variables, fileManager) },
                 };
             }
 

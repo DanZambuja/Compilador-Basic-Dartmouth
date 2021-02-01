@@ -23,7 +23,7 @@ namespace Compiler.ArmRoutineGenerators
         private ArithmeticStateMachine exp;
         private Token variable;
 
-        public LetStateMachine(VariableTable variables, FileManager fileManager) {
+        public LetStateMachine(ArithmeticStateMachine exp, VariableTable variables, FileManager fileManager) {
             CurrentState = LetMachineState.START;
             transitions = new Dictionary<LetStateTransition, LetMachineState>
             {
@@ -39,7 +39,7 @@ namespace Compiler.ArmRoutineGenerators
             };
             this.variables = variables;
             this.command = new LetCommand(fileManager);
-            this.exp = new ArithmeticStateMachine(variables, fileManager);
+            this.exp = exp;
         }
 
 

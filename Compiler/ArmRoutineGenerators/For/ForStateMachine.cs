@@ -24,7 +24,7 @@ namespace Compiler.ArmRoutineGenerators
         private Token loopedVariable;
         private ArithmeticStateMachine exp;
 
-        public ForStateMachine(VariableTable variables, FileManager fileManager) {
+        public ForStateMachine(ArithmeticStateMachine exp, VariableTable variables, FileManager fileManager) {
             CurrentState = ForMachineState.START;
             transitions = new Dictionary<ForStateTransition, ForMachineState>
             {
@@ -44,7 +44,7 @@ namespace Compiler.ArmRoutineGenerators
             };
             this.variables = variables;
             this.command = new ForCommand(variables, fileManager);
-            this.exp = new ArithmeticStateMachine(variables, fileManager);
+            this.exp = exp;
         }
 
         public ForMachineState GetNext(Token token)
